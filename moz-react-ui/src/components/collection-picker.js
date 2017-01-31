@@ -10,4 +10,4 @@ class CollectionPicker extends Component {
   }
 }
 
-export default CollectionPicker;
+export default CollectionPicker
