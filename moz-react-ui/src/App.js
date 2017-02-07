@@ -9,18 +9,21 @@ class App extends Component {
     // non ui stuff creation
     super(props )
     this.data = new MosaicData('http://debarena.com/moz/')
-    //this.state =
+    this.state = {collectionMetadata : this.data.collectionsMetadata}
   }
 
   componentDidMount() {
     // server stuff & initializations
-    this.data.initializeCollections()
+    this.data.initializeCollections().then( (metadata) =>  {
+      this.setState({collectionMetadata: metadata})
+      console.log('ok')
+      })
   }
 
   render() {
     return (
       <div className="App">
-        <CollectionPicker />
+        <CollectionPicker collections={this.state.collectionMetadata}/>
       </div>
     )
   }

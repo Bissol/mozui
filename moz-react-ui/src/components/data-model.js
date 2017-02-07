@@ -18,11 +18,14 @@ class MosaicData {
   }
 
   initializeCollections() {
-  	fetch(this.collectionMetadataUrl)
-	  .then(function(response) {
+  	return fetch(this.collectionMetadataUrl)
+	  .then( (response) => {
 	    return response.json()
-	  }).then(function(json) {
+	  }).then( (json) => {
 	    console.log('parsed json', json)
+	    let collections = json.collections
+	    collections = collections.map( c => {c.checked = false; return c})
+	    return this.collectionsMetadata = collections
 	  }).catch(function(ex) {
 	    console.log('parsing failed', ex)
 	  })
