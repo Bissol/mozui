@@ -6,13 +6,15 @@ import './App.css';
 class App extends Component {
 
   constructor(props) {
+    // non ui stuff creation
     super(props )
-    this.data = new MosaicData()
+    this.data = new MosaicData('http://debarena.com/moz/')
     //this.state =
   }
 
   componentDidMount() {
-
+    // server stuff & initializations
+    this.data.initializeCollections()
   }
 
   render() {
