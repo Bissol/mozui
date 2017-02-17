@@ -10,20 +10,25 @@ class App extends Component {
     super(props )
     this.data = new MosaicData('http://debarena.com/moz/')
     this.state = {collectionMetadata : this.data.collectionsMetadata}
+
+    this.collectionChecked = this.collectionChecked.bind(this)
   }
 
   componentDidMount() {
     // server stuff & initializations
     this.data.initializeCollections().then( (metadata) =>  {
       this.setState({collectionMetadata: metadata})
-      console.log('ok')
       })
+  }
+
+  collectionChecked(collectionMetadata) {
+    this.data.selectCollection(collectionMetadata).then(this.setState({collectionMetadata: this.data.collectionsMetadata}))
   }
 
   render() {
     return (
       <div className="App">
-        <CollectionPicker collections={this.state.collectionMetadata}/>
+        <CollectionPicker collections={this.state.collectionMetadata} onCollectionSelected={this.collectionChecked} />
       </div>
     )
   }

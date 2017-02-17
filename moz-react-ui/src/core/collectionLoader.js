@@ -1,3 +1,5 @@
+let jBinary = require('jbinary')
+
 // TypeSet Version 1
   var typeSet = {
     'jBinary.littleEndian': true,
@@ -12,7 +14,7 @@ let baseUrl = "http://debarena.com/moz/data/tiles"
 function loadCollectionJson(collectionName, callback)
 {
   let t0 = performance.now()
-  let url = baseUrl + '/' + collectionName + '/' + "data.bin"
+  let url = baseUrl + '/' + collectionName + '/data.bin'
   
   jBinary.load(url, typeSet, (err, binary) => {
     const head = binary.read('header')
@@ -28,3 +30,5 @@ function loadCollectionJson(collectionName, callback)
     callback(res)
   });
 }
+
+export {loadCollectionJson};
