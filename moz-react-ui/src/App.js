@@ -22,7 +22,9 @@ class App extends Component {
   }
 
   collectionChecked(collectionMetadata) {
-    this.data.selectCollection(collectionMetadata).then(this.setState({collectionMetadata: this.data.collectionsMetadata}))
+    this.data.selectCollection(collectionMetadata).then( (collection) => {
+      this.setState({collectionMetadata: this.data.collectionsMetadata})
+    })
   }
 
   render() {

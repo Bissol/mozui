@@ -32,17 +32,31 @@ class MosaicData {
 	  })
   }
 
+  // Toggle selection + loads collection from server if necessary
   selectCollection(collectionMetadata) {
   	return new Promise( (resolve, reject) => {
-  		if (collectionMetadata.loaded) {
+  		if (collectionMetadata.checked)
+  		{
+  			// Unselect (already loaded)
+  			console.log('unselect collection')
+  			collectionMetadata.checked = false
   			resolve(this.collections[collectionMetadata.dir])
   		}
-
-	  	loadCollectionJson(collectionMetadata.dir, (res) => {
-	  		collectionMetadata.loaded = true
-	  		collectionMetadata.checked = true
-		  	this.collections[collectionMetadata.dir] = res
-		  	resolve(this.collections[collectionMetadata.dir])})
+  		else if (collectionMetadata.loaded) {
+  			// Already loaded
+  			console.log('select already loaded collection')
+  			collectionMetadata.checked = true
+  			resolve(this.collections[collectionMetadata.dir])
+  		}
+  		else {
+  			// load & select
+		  	loadCollectionJson(collectionMetadata.dir, (res) => {
+		  		console.log('loading collection')
+		  		collectionMetadata.loaded = true
+		  		collectionMetadata.checked = true
+			  	this.collections[collectionMetadata.dir] = res
+			  	resolve(this.collections[collectionMetadata.dir])})
+		 }
 	})
   }
 

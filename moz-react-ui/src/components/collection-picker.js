@@ -7,7 +7,7 @@ class CollectionPicker extends Component {
   }
 
   render() {
-    
+    console.log('rendering collection picker')
     let collectionItems = [];
     if (this.props.collections) {
       //console.log(this.props.collections)
