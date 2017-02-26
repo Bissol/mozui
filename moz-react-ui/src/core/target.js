@@ -1,22 +1,34 @@
 class Target {
   
-  constructor(imageElement) {
-    this.imageElement = imageElement
-    this.canvas = document.createElement('canvas')
-    this.context = this.canvas.getContext('2d')
-    this.width = imageElement.clientWidth
-    this.height = imageElement.clientHeight
-    this.canvas.width = this.width
-    this.canvas.height = this.height
-    this.context.drawImage(imageElement, 0, 0)
-    this.numColRow
-    this.numCol
-    this.numRow
-    this.tileSize
-    this.setNumColRow(50)
+  constructor(imageSrcData, callback) {
+    this.ready = false
+    this.imageSrcData = imageSrcData
+    this.imageElement = new Image()
+    this.width = -1
+    this.height = -1
+    this.defaultNumColRow = 50
+    this.numColRow = 0
+    this.numCol = 0
+    this.numRow = 0
+    this.tileSize = 0
     this.pixSampling = 2
     this.matchSize = 4
     this.colorData = []
+    this.canvas = document.createElement('canvas')
+    this.context = this.canvas.getContext('2d')
+
+    this.imageElement.onload = () => {
+      this.width = this.imageElement.width
+      this.height = this.imageElement.height
+      this.canvas.width = this.width
+      this.canvas.height = this.height
+      this.context.drawImage(this.imageElement, 0, 0)
+      this.setNumColRow(this.defaultNumColRow)
+      this.extractColorInfo()
+      this.ready = true
+      callback()
+    }
+    this.imageElement.src = imageSrcData
   }
   
   setNumColRow(ncr)
@@ -26,6 +38,7 @@ class Target {
     this.numRow = this.width <= this.height ? this.numColRow : Math.round(this.numColRow * (this.height / this.width))
     this.tileSize = Math.round(this.width / this.numCol)
     this.colorData = new Array(this.numCol * this.numRow)
+    console.log('Target loaded. col=' + this.numCol + ' row=' + this.numRow)
   }
   
   extractColorInfo()
@@ -35,6 +48,8 @@ class Target {
           this.colorData[i + j*this.numCol] = this.extractTile(i,j)
         }
     }
+
+    console.log('Extracted ' + this.colorData.length + ' regions from target image')
   }
   
   extractTile(i,j)
@@ -84,7 +99,9 @@ class Target {
     rgb.r = ~~(rgb.r/count)
     rgb.g = ~~(rgb.g/count)
     rgb.b = ~~(rgb.b/count)
-    if (rgb.r === 0) console.log('No red in region ' + x + ',' + y + ' of size ' + subsize)
+    if (rgb.r === 0 && rgb.g === 0 && rgb.b === 0) console.log('Problem in region (' + x + ',' + y + ') of size ' + subsize)
     return rgb
   }
 }
+
+export default Target

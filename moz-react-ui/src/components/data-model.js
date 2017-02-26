@@ -2,6 +2,8 @@
 // Responsible for server communication
 require('whatwg-fetch')
 import { loadCollectionJson } from '../core/collectionLoader'
+import Target from '../core/target'
+
 
 class MosaicData {
 
@@ -14,8 +16,8 @@ class MosaicData {
     this.collections = []
   }
  
-  setTarget(path) {
-    alert('todo')
+  setTarget(imgData, callback) {
+    this.target = new Target(imgData, callback)
   }
 
   initializeCollections() {
