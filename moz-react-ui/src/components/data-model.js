@@ -52,6 +52,7 @@ class MosaicData {
   		}
   		else {
   			// load & select
+  			console.log(collectionMetadata)
 		  	loadCollectionJson(collectionMetadata.dir, (res) => {
 		  		console.log('loading collection')
 		  		collectionMetadata.loaded = true

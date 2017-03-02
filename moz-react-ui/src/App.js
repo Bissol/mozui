@@ -3,6 +3,7 @@ import MosaicData from './components/data-model'
 import CollectionPicker from './components/collection-picker'
 import TargetImage from './components/target-image'
 import MosaicParameters from './components/mosaic-parameters'
+import MosaicPreview from './components/mosaic-preview'
 import './App.css';
 
 class App extends Component {
@@ -15,6 +16,7 @@ class App extends Component {
 
     this.collectionChecked = this.collectionChecked.bind(this)
     this.targetImageChanged = this.targetImageChanged.bind(this)
+    this.parametersChanged = this.parametersChanged.bind(this)
   }
 
   componentDidMount() {
@@ -32,16 +34,22 @@ class App extends Component {
 
   targetImageChanged(imgData) {
     console.log('Target image changed')
-    let done = () => {alert('lol');this.setState({targetData : this.data.target})}
+    let done = () => {this.setState({targetData : this.data.target})}
     this.data.setTarget(imgData, done)
+  }
+
+  parametersChanged(params, changedParam) {
+    console.log('[App] Parameters changed:')
+    console.log(params)
   }
 
   render() {
 
     return (
       <div className="App">
-        <MosaicParameters />
+        <MosaicParameters onParametersChanged={this.parametersChanged}/>
         <TargetImage targetImage={this.state.targetData} onTargetImageChanged={this.targetImageChanged}/>
+        <MosaicPreview width={300} height={300} />
         <CollectionPicker collections={this.state.collectionMetadata} onCollectionSelected={this.collectionChecked} />
       </div>
     )

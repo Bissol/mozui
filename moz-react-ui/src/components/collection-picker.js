@@ -7,12 +7,12 @@ class CollectionPicker extends Component {
   }
 
   render() {
-    console.log('rendering collection picker')
+    //console.log('rendering collection picker')
     let collectionItems = [];
     if (this.props.collections) {
       //console.log(this.props.collections)
       collectionItems = this.props.collections.map((collection, i) =>
-      <li key={i}><span>{collection.name_fr}<input type="checkbox" checked={collection.checked} onChange={collection => this.selectionChanged(collection)}/></span></li>
+      <li key={i}><span>{collection.name_fr}<input type="checkbox" checked={collection.checked} onChange={() => this.selectionChanged(collection)}/></span></li>
       )
     }
 
