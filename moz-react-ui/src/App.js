@@ -29,25 +29,34 @@ class App extends Component {
   collectionChecked(collectionMetadata) {
     this.data.selectCollection(collectionMetadata).then( (collection) => {
       this.setState({collectionMetadata: this.data.collectionsMetadata})
+      this.data.initMosaic()
+      this.data.computeMosaic()
     })
   }
 
   targetImageChanged(imgData) {
     console.log('Target image changed')
-    let done = () => {this.setState({targetData : this.data.target})}
+    let done = () => {
+      this.setState({targetData : this.data.target})
+      this.data.initMosaic()
+      this.data.computeMosaic()
+    }
     this.data.setTarget(imgData, done)
   }
 
   parametersChanged(params, changedParam) {
     console.log('[App] Parameters changed:')
     console.log(params)
+    this.data.parameters = params
+
+    this.data.computeMosaic().then( () => {console.log('Mosaic successfully generated')}, () => {console.error('Error while generating mosaic')})
   }
 
   render() {
 
     return (
       <div className="App">
-        <MosaicParameters onParametersChanged={this.parametersChanged}/>
+        <MosaicParameters initialParameters={this.data.parameters} onParametersChanged={this.parametersChanged}/>
         <TargetImage targetImage={this.state.targetData} onTargetImageChanged={this.targetImageChanged}/>
         <MosaicPreview width={300} height={300} />
         <CollectionPicker collections={this.state.collectionMetadata} onCollectionSelected={this.collectionChecked} />

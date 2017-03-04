@@ -1,14 +1,13 @@
-let COLOR_WEIGHT = 1
 
 function distance(t1, t2)
 {
   // {nbsub:this.matchSize*this.matchSize, avg: avgrgb, colors: colors}
-  if (t1.nbsub != t2.nbsub) {
+  if (t1.nbsub !== t2.nbsub) {
     console.log("Cant't compare tiles")
     return 1
   }
   
-  res = 0
+  let res = 0
   for(var i=0; i<t1.nbsub; i++)
     {
       // Color + intensity
@@ -33,7 +32,7 @@ function intensity(rgb)
 function merge(t1, w1, t2, w2, res)
 {
   // {nbsub:this.matchSize*this.matchSize, avg: avgrgb, colors: colors}
-  if (t1.nbsub != t2.nbsub) {
+  if (t1.nbsub !== t2.nbsub) {
     console.log("Cant't merge tiles")
     return 1
   }
@@ -63,3 +62,5 @@ function merge(t1, w1, t2, w2, res)
       res.colors[i].b = intens*/
     }
 }
+
+export {distance, merge}

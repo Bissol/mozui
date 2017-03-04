@@ -1,3 +1,6 @@
+import Cluster from './cluster'
+import {distance} from './distance'
+
 class Mosaic {
   
   constructor(collections, target) {
@@ -8,7 +11,24 @@ class Mosaic {
     this.seeds = []
     this.indexedCollections = []
     this.clusterer = new Cluster(this.target.colorData, this.nbSeeds)
+
+    this.ready = false
+
     this.result = {}
+  }
+
+  make()
+  {
+    return new Promise( (resolve, reject) => {
+      if (this.ready) {
+        let compTime = this.makeSingleThread()
+        resolve(compTime)
+      }
+      else {
+        reject('Not ready')
+      }
+      
+    })
   }
   
   makeSingleThread()
@@ -25,6 +45,7 @@ class Mosaic {
     
     let t1 = performance.now()
     console.log("Making mosaic (single thread) took " + (t1 - t0) + " milliseconds.")
+    return t1
   }
   
   serverRender()
@@ -56,7 +77,7 @@ class Mosaic {
   distributeCollectionsItems()
   {
     if (this.seeds.length <= 0) {
-      console.log('No seeds, aborting')
+      console.error('No seeds, aborting')
       return false
     }
     
@@ -67,13 +88,14 @@ class Mosaic {
       this.indexedCollections[i] = []
     })
     
-    this.collections.forEach( (collec) => {
-      collec.data.forEach( (item) => {
-        let idx = this.assignTileToSeed(item)
-        this.indexedCollections[idx].push({c:collec.name, d:item})
-        tot++
-      })
-    })
+      for (let key in this.collections) {
+        let collec = this.collections[key]
+        collec.data.forEach( (item) => {
+          let idx = this.assignTileToSeed(item)
+          this.indexedCollections[idx].push({c:collec.name, d:item})
+          tot++
+        })
+    }
     
     let t1 = performance.now();
     console.log("Indexing " + tot + " items took " + (t1 - t0) + " milliseconds.")
@@ -159,3 +181,5 @@ class Mosaic {
     
   }
 }
+
+export default Mosaic

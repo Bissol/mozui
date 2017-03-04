@@ -1,3 +1,5 @@
+import {distance, merge} from './distance'
+
 class Cluster {
   
   constructor(tiles, k) {
@@ -14,9 +16,8 @@ class Cluster {
   {
     for (var nbiter=0; nbiter<10; nbiter++) {
       this.voteForClusters()
-      var minIdx = this.votes.reduce((iMin, x, i, arr) => x < arr[iMin] ? i : iMin, 0)
-      var maxIdx = this.votes.reduce((iMax, x, i, arr) => x > arr[iMax] ? i : iMax, 0)
-      //this.recenterSeeds()
+      this.votes.reduce((iMin, x, i, arr) => x < arr[iMin] ? i : iMin, 0)
+      this.votes.reduce((iMax, x, i, arr) => x > arr[iMax] ? i : iMax, 0)
     }
     return this.clusterCenters
   }
@@ -63,3 +64,5 @@ class Cluster {
     return clus_i
   }
 }
+
+export default Cluster;

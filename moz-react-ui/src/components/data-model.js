@@ -3,17 +3,30 @@
 require('whatwg-fetch')
 import { loadCollectionJson } from '../core/collectionLoader'
 import Target from '../core/target'
+import Mosaic from '../core/mosaic'
 
 
 class MosaicData {
 
   constructor(serverUrl) {
+
+  	// Target image
     this.target = undefined
 
     // Collections
     this.collectionMetadataUrl = serverUrl + 'php/collectionsDescription.json'
     this.collectionsMetadata = undefined
     this.collections = []
+
+    // Mosaic
+    this.mosaic = undefined
+    this.mo
+
+    // Parameters
+    const numColRow_DEFAULT = 50
+    this.parameters = { 
+          numColRow : (localStorage.getItem('numColRow') ? localStorage.getItem('numColRow') : numColRow_DEFAULT)
+        }
   }
  
   setTarget(imgData, callback) {
@@ -30,7 +43,7 @@ class MosaicData {
 	    collections = collections.map( c => {c.checked = false; c.loaded = false; return c})
 	    return this.collectionsMetadata = collections
 	  }).catch(function(ex) {
-	    console.log('parsing failed', ex)
+	    console.error('parsing failed', ex)
 	  })
   }
 
@@ -40,13 +53,13 @@ class MosaicData {
   		if (collectionMetadata.checked)
   		{
   			// Unselect (already loaded)
-  			console.log('unselect collection')
+  			console.log('Unselecting collection')
   			collectionMetadata.checked = false
   			resolve(this.collections[collectionMetadata.dir])
   		}
   		else if (collectionMetadata.loaded) {
   			// Already loaded
-  			console.log('select already loaded collection')
+  			console.log('Selecting already loaded collection')
   			collectionMetadata.checked = true
   			resolve(this.collections[collectionMetadata.dir])
   		}
@@ -54,13 +67,54 @@ class MosaicData {
   			// load & select
   			console.log(collectionMetadata)
 		  	loadCollectionJson(collectionMetadata.dir, (res) => {
-		  		console.log('loading collection')
+		  		console.log('Loading collection')
 		  		collectionMetadata.loaded = true
 		  		collectionMetadata.checked = true
 			  	this.collections[collectionMetadata.dir] = res
 			  	resolve(this.collections[collectionMetadata.dir])})
 		 }
 	})
+  }
+
+  // Get an object whose properties are selected collections
+  getSelectedCollections() {
+  	let selectedCollections = {}
+  	for (let key in this.collections) {
+  		let col = this.collections[key]
+  		this.collectionsMetadata.forEach( (collectionMetadata) => {
+  			if (collectionMetadata.dir === col.name) {
+  			 if (collectionMetadata.loaded && collectionMetadata.checked) {
+  			 	selectedCollections[key] = col
+  			 }
+  			}
+  		})
+  	}
+
+  	return selectedCollections
+  }
+
+  // Initializes a new mosaic using current parameters
+  initMosaic() {
+  	
+  	let selectionOfCollections = this.getSelectedCollections()
+
+  	if (selectionOfCollections && Object.keys(selectionOfCollections).length > 0 && this.target) {
+	  	this.mosaic = new Mosaic(selectionOfCollections, this.target)
+	  	this.mosaic.computeFastIndex()
+	  	this.mosaic.ready = true
+	  	console.log('Mosaic initialized')
+	}
+	else {
+		if (this.mosaic) this.mosaic.ready = false
+		if (!selectionOfCollections) {console.error('Could not initialize mosaic')}
+		else if (Object.keys(selectionOfCollections).length <= 0) {console.log('No collection selected')}
+		else if (!this.target) {console.error('Target image not ready')}
+	}
+  }
+
+  // Compute mosaic based on collections, target and current parameters
+  computeMosaic() {
+  	return (this.mosaic && this.mosaic.ready) ? this.mosaic.make() : false
   }
 
 }

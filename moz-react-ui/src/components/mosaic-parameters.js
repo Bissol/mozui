@@ -9,15 +9,12 @@ class MosaicParameters extends Component {
 
     this.mosaicSizeChanged = this.mosaicSizeChanged.bind(this)
 
-    const numColRow_DEFAULT = 50
+    
     const mode_DEFAULT = 'simple'
     this.state = 
     {
       mode : (localStorage.getItem('paramMode') ? localStorage.getItem('paramMode') : mode_DEFAULT),
-      parameters :
-        { 
-          numColRow : (localStorage.getItem('numColRow') ? localStorage.getItem('numColRow') : numColRow_DEFAULT)
-        }
+      parameters : this.props.initialParameters
     }
   }
 

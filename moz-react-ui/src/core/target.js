@@ -87,19 +87,20 @@ class Target {
     let count = 0
     const length = data.data.length;
     
-    let ii=0
-    while ( (ii += this.pixSampling * 4) < length ) {
+    let ii = this.pixSampling * 4
+    while ( ii < length ) {
         ++count
         rgb.r += data.data[ii]
         rgb.g += data.data[ii+1]
         rgb.b += data.data[ii+2]
+        ii += this.pixSampling * 4
     }
 
     // Averaging
     rgb.r = ~~(rgb.r/count)
     rgb.g = ~~(rgb.g/count)
     rgb.b = ~~(rgb.b/count)
-    if (rgb.r === 0 && rgb.g === 0 && rgb.b === 0) console.log('Problem in region (' + x + ',' + y + ') of size ' + subsize)
+    if (rgb.r === 0 && rgb.g === 0 && rgb.b === 0) console.error('Problem in region (' + x + ',' + y + ') of size ' + subsize)
     return rgb
   }
 }
