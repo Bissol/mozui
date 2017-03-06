@@ -7,7 +7,7 @@ class Mosaic {
     this.collections = collections
     this.target = target
     this.workers = []
-    this.nbSeeds = 20
+    this.nbSeeds = 10
     this.seeds = []
     this.indexedCollections = []
     this.clusterer = new Cluster(this.target.colorData, this.nbSeeds)
@@ -19,6 +19,7 @@ class Mosaic {
 
   make()
   {
+    console.log('Starting mosaic with ncr=' + this.target.numColRow)
     return new Promise( (resolve, reject) => {
       if (this.ready) {
         let compTime = this.makeSingleThread()
@@ -40,6 +41,7 @@ class Mosaic {
     this.target.colorData.forEach( (cd, cdi) => {
       let cluster_i = this.assignTileToSeed(cd)
       let best = this.findBestMatch(cd, this.indexedCollections[cluster_i])
+      if (!best) console.error('No match for region ' + cdi)
       this.result.data.push(best)
     })
     
@@ -88,13 +90,17 @@ class Mosaic {
       this.indexedCollections[i] = []
     })
     
-      for (let key in this.collections) {
+    let func = (item, collec) => {
+      let idx = this.assignTileToSeed(item)
+      this.indexedCollections[idx].push({c:collec.name, d:item})
+      tot++
+    }
+
+    for (let key in this.collections) {
+      if(this.collections.hasOwnProperty(key)) {
         let collec = this.collections[key]
-        collec.data.forEach( (item) => {
-          let idx = this.assignTileToSeed(item)
-          this.indexedCollections[idx].push({c:collec.name, d:item})
-          tot++
-        })
+        collec.data.forEach( item => func(item, collec))
+      }
     }
     
     let t1 = performance.now();
@@ -165,7 +171,7 @@ class Mosaic {
   findBestMatch(t, tiles)
   {
     let minDist = Infinity
-    let best = {}
+    let best = undefined
     tiles.forEach( (tt,tti) => {
       let d = distance(t,tt.d)
       if (d  < minDist) {

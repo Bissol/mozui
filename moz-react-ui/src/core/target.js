@@ -1,13 +1,13 @@
 class Target {
   
-  constructor(imageSrcData, callback) {
+  constructor(imageSrcData, callback, initialNumColRow) {
     this.ready = false
     this.imageSrcData = imageSrcData
     this.imageElement = new Image()
     this.width = -1
     this.height = -1
     this.defaultNumColRow = 50
-    this.numColRow = 0
+    this.numColRow = initialNumColRow ? initialNumColRow : this.defaultNumColRow
     this.numCol = 0
     this.numRow = 0
     this.tileSize = 0
@@ -23,7 +23,7 @@ class Target {
       this.canvas.width = this.width
       this.canvas.height = this.height
       this.context.drawImage(this.imageElement, 0, 0)
-      this.setNumColRow(this.defaultNumColRow)
+      this.setNumColRow(this.numColRow)
       this.extractColorInfo()
       this.ready = true
       callback()
@@ -31,14 +31,23 @@ class Target {
     this.imageElement.src = imageSrcData
   }
   
+  changeNumColRow(ncr) {
+    this.setNumColRow(ncr)
+    return new Promise( (resolve, reject) => {
+      this.extractColorInfo()
+      resolve()
+    })
+  }
+
   setNumColRow(ncr)
   {
     this.numColRow = ncr
     this.numCol = this.width > this.height ? this.numColRow : Math.round(this.numColRow * (this.width / this.height))
     this.numRow = this.width <= this.height ? this.numColRow : Math.round(this.numColRow * (this.height / this.width))
-    this.tileSize = Math.round(this.width / this.numCol)
+    const longSide = this.width > this.height ? this.width : this.height
+    this.tileSize = Math.floor(longSide / this.numColRow)
     this.colorData = new Array(this.numCol * this.numRow)
-    console.log('Target loaded. col=' + this.numCol + ' row=' + this.numRow)
+    console.log('Target numColRow changed: (' + this.numCol + ',' + this.numRow + ') w:' + this.width + '/' + (this.numCol * this.tileSize) + ' - ' +  this.height + '/' + (this.numRow * this.tileSize))
   }
   
   extractColorInfo()
@@ -59,18 +68,21 @@ class Target {
     const x = i * this.tileSize
     const y = j * this.tileSize
     let avgrgb = {r:0,g:0,b:0}
+    let count = 0
     for (var dx=0; dx<this.matchSize; dx++) {
         for (var dy=0; dy<this.matchSize; dy++) {
           const c = this.extractRegion( x + (dx*subsize),y + (dy * subsize),subsize)
-          colors.push(c)
-          avgrgb.r += c.r
-          avgrgb.g += c.g
-          avgrgb.b += c.b
+          if (c !== 0) {
+            colors.push(c)
+            avgrgb.r += c.r
+            avgrgb.g += c.g
+            avgrgb.b += c.b
+            count++
+          }
         }
     }
     
     // Averaging
-    const count = this.matchSize * this.matchSize
     avgrgb.r = ~~(avgrgb.r/count)
     avgrgb.g = ~~(avgrgb.g/count)
     avgrgb.b = ~~(avgrgb.b/count)
@@ -100,7 +112,7 @@ class Target {
     rgb.r = ~~(rgb.r/count)
     rgb.g = ~~(rgb.g/count)
     rgb.b = ~~(rgb.b/count)
-    if (rgb.r === 0 && rgb.g === 0 && rgb.b === 0) console.error('Problem in region (' + x + ',' + y + ') of size ' + subsize)
+    //if (rgb.r === 0 && rgb.g === 0 && rgb.b === 0) console.error('Problem in region (' + x + ',' + y + ') of size ' + subsize)
     return rgb
   }
 }

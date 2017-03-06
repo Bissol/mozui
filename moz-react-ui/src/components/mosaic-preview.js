@@ -13,12 +13,45 @@ class MosaicPreview extends Component {
 
   drawPreview() {
     const context = this.refs.canvas.getContext('2d')
-    context.save();
-    context.translate(100, 100);
-    context.rotate(this.props.rotation, 100, 100);
-    context.fillStyle = '#F00';
-    context.fillRect(-50, -50, 100, 100);
-    context.restore();
+    context.clearRect(0, 0, this.props.width, this.props.height)
+
+    if (this.props.previewData) {
+
+      let tileArray = this.props.previewData.data.map((e)=>(e.d))
+      let numCol = this.props.previewData.w
+      let numRow = this.props.previewData.h
+      let tileSize = numRow > numCol ? (this.props.width / numRow) : (this.props.height / numCol)
+      tileSize = Math.round(tileSize)
+
+      for (var i=0; i<numCol; i++) {
+        for (var j=0; j<numRow; j++) {
+          let tile = tileArray[i + numCol*j]
+          this.displayInCanvas(tile, context, i, j, tileSize)
+        }
+      }
+
+    }
+  }
+
+  // Display server tile at given position in a canvas
+  displayInCanvas(tile, ctx, i, j, size, txt) {
+    if (!tile) return
+
+    const x = Math.ceil(i * size)
+    const y = Math.ceil(j * size)
+    const numColRow = Math.sqrt(tile.nbsub)
+    var subsize = Math.round(size / numColRow)
+    for (var si=0; si<numColRow; si++)
+      {
+        for (var sj=0; sj<numColRow; sj++)
+          {
+            ctx.beginPath()
+            ctx.rect(x + si*subsize, y + sj*subsize, subsize, subsize)
+            const col = tile.colors[si*numColRow + sj]
+            ctx.fillStyle = "rgba("+col.r+", "+col.g+", "+col.b+", 1)"
+            ctx.fill()
+          }
+      }
   }
 
   render() {

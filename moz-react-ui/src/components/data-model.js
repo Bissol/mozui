@@ -20,7 +20,6 @@ class MosaicData {
 
     // Mosaic
     this.mosaic = undefined
-    this.mo
 
     // Parameters
     const numColRow_DEFAULT = 50
@@ -30,7 +29,7 @@ class MosaicData {
   }
  
   setTarget(imgData, callback) {
-    this.target = new Target(imgData, callback)
+    this.target = new Target(imgData, callback, this.parameters.numColRow)
   }
 
   initializeCollections() {
@@ -80,14 +79,16 @@ class MosaicData {
   getSelectedCollections() {
   	let selectedCollections = {}
   	for (let key in this.collections) {
-  		let col = this.collections[key]
-  		this.collectionsMetadata.forEach( (collectionMetadata) => {
-  			if (collectionMetadata.dir === col.name) {
-  			 if (collectionMetadata.loaded && collectionMetadata.checked) {
-  			 	selectedCollections[key] = col
-  			 }
-  			}
-  		})
+  		if(this.collections.hasOwnProperty(key)) {
+	  		let col = this.collections[key]
+	  		this.collectionsMetadata.forEach( (collectionMetadata) => {
+	  			if (collectionMetadata.dir === col.name) {
+	  			 if (collectionMetadata.loaded && collectionMetadata.checked) {
+	  			 	selectedCollections[key] = col
+	  			 }
+	  			}
+	  		})
+	  	}
   	}
 
   	return selectedCollections
@@ -114,7 +115,7 @@ class MosaicData {
 
   // Compute mosaic based on collections, target and current parameters
   computeMosaic() {
-  	return (this.mosaic && this.mosaic.ready) ? this.mosaic.make() : false
+  	return (this.mosaic && this.mosaic.ready) ? this.mosaic.make() : Promise.reject()
   }
 
 }

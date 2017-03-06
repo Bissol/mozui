@@ -12,7 +12,11 @@ class App extends Component {
     // non ui stuff creation
     super(props )
     this.data = new MosaicData('http://debarena.com/moz/')
-    this.state = {collectionMetadata : this.data.collectionsMetadata, targetData : this.data.target}
+    this.state = {
+      collectionMetadata : this.data.collectionsMetadata,
+       targetData : this.data.target,
+       previewData : undefined
+     }
 
     this.collectionChecked = this.collectionChecked.bind(this)
     this.targetImageChanged = this.targetImageChanged.bind(this)
@@ -29,8 +33,7 @@ class App extends Component {
   collectionChecked(collectionMetadata) {
     this.data.selectCollection(collectionMetadata).then( (collection) => {
       this.setState({collectionMetadata: this.data.collectionsMetadata})
-      this.data.initMosaic()
-      this.data.computeMosaic()
+      this.makeMosaic(true)
     })
   }
 
@@ -38,8 +41,7 @@ class App extends Component {
     console.log('Target image changed')
     let done = () => {
       this.setState({targetData : this.data.target})
-      this.data.initMosaic()
-      this.data.computeMosaic()
+      this.makeMosaic(true)
     }
     this.data.setTarget(imgData, done)
   }
@@ -49,7 +51,26 @@ class App extends Component {
     console.log(params)
     this.data.parameters = params
 
-    this.data.computeMosaic().then( () => {console.log('Mosaic successfully generated')}, () => {console.error('Error while generating mosaic')})
+    if (changedParam === 'numColRow') {
+      if (this.data.target) this.data.target.changeNumColRow(params.numColRow).then( () => {this.makeMosaic(true)})
+    }
+  }
+
+  makeMosaic(init) {
+
+    if (init) {
+      this.data.initMosaic()
+    }
+
+    this.data.computeMosaic().then( 
+      (compTime) => {
+        console.log('Mosaic successfully generated')
+        this.setState({ previewData : this.data.mosaic.result })
+      }, 
+      () => {
+        console.error('Error while generating mosaic')
+      }
+    )
   }
 
   render() {
@@ -58,7 +79,7 @@ class App extends Component {
       <div className="App">
         <MosaicParameters initialParameters={this.data.parameters} onParametersChanged={this.parametersChanged}/>
         <TargetImage targetImage={this.state.targetData} onTargetImageChanged={this.targetImageChanged}/>
-        <MosaicPreview width={300} height={300} />
+        <MosaicPreview width={600} height={600} previewData={this.state.previewData}/>
         <CollectionPicker collections={this.state.collectionMetadata} onCollectionSelected={this.collectionChecked} />
       </div>
     )
