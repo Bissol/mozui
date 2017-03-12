@@ -96,26 +96,29 @@ class MosaicData {
 
   // Initializes a new mosaic using current parameters
   initMosaic() {
-  	
-  	let selectionOfCollections = this.getSelectedCollections()
+  	return new Promise( (resolve, reject) => {
+    	let selectionOfCollections = this.getSelectedCollections()
 
-  	if (selectionOfCollections && Object.keys(selectionOfCollections).length > 0 && this.target) {
-	  	this.mosaic = new Mosaic(selectionOfCollections, this.target)
-	  	this.mosaic.computeFastIndex()
-	  	this.mosaic.ready = true
-	  	console.log('Mosaic initialized')
-	}
-	else {
-		if (this.mosaic) this.mosaic.ready = false
-		if (!selectionOfCollections) {console.error('Could not initialize mosaic')}
-		else if (Object.keys(selectionOfCollections).length <= 0) {console.log('No collection selected')}
-		else if (!this.target) {console.error('Target image not ready')}
-	}
+    	if (selectionOfCollections && Object.keys(selectionOfCollections).length > 0 && this.target) {
+  	  	this.mosaic = new Mosaic(selectionOfCollections, this.target)
+  	  	this.mosaic.computeFastIndex().then( () => {
+          this.mosaic.ready = true
+          resolve()
+        console.log('Mosaic initialized')
+        })
+    	}
+    	else {
+    		if (this.mosaic) this.mosaic.ready = false
+    		if (!selectionOfCollections) {console.error('Could not initialize mosaic')}
+    		else if (Object.keys(selectionOfCollections).length <= 0) {console.log('No collection selected')}
+    		else if (!this.target) {console.error('Target image not ready')}
+    	}
+    })
   }
 
   // Compute mosaic based on collections, target and current parameters
   computeMosaic() {
-  	return (this.mosaic && this.mosaic.ready) ? this.mosaic.make() : Promise.reject()
+  	return (this.mosaic && this.mosaic.ready) ? this.mosaic.make() : Promise.reject('No mosaic or mosaic not ready')
   }
 
 }

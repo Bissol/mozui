@@ -59,16 +59,25 @@ class App extends Component {
   makeMosaic(init) {
 
     if (init) {
-      this.data.initMosaic()
+      this.data.initMosaic().then( () => {
+        this.makeMosaicPromise()
+      })
+    }
+    else {
+      this.makeMosaicPromise()
     }
 
+    
+  }
+
+  makeMosaicPromise() {
     this.data.computeMosaic().then( 
       (compTime) => {
         console.log('Mosaic successfully generated')
         this.setState({ previewData : this.data.mosaic.result })
       }, 
-      () => {
-        console.error('Error while generating mosaic')
+      (err) => {
+        console.error('Error while generating mosaic: ' + err)
       }
     )
   }

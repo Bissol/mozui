@@ -1,5 +1,7 @@
 import Cluster from './cluster'
 import {distance} from './distance'
+import {serverRender, computeFastIndex, distributeCollectionsItems, findSeeds, assignTileToSeed, findBestMatch} from './mosaicFunctions.js'
+let IndexingWorker = require("./workers/indexCollectionsFromSeeds.w.js")
 
 class Mosaic {
   
@@ -17,6 +19,19 @@ class Mosaic {
     this.result = {}
   }
 
+  indexCollectionsWithWorkers() {
+    return new Promise( (resolve, reject) => {
+      let worker = new IndexingWorker()
+      worker.postMessage({cmd: 'start', seeds: this.seeds, collections: this.collections})
+      worker.addEventListener("message", (event) => {
+        if (!event.data) reject('indexCollectionsWithWorkers: no data')
+        this.indexedCollections = event.data.data
+        resolve()
+      })
+    })
+  }
+
+  
   make()
   {
     console.log('Starting mosaic with ncr=' + this.target.numColRow)
@@ -31,7 +46,14 @@ class Mosaic {
       
     })
   }
-  
+
+  makeWithWorkers() {
+
+    // Worker for distributing target tiles to n groups
+
+    // Launch n workers with their own tiles group and own collection (mixed)
+  }
+
   makeSingleThread()
   {
     let t0 = performance.now()
@@ -72,40 +94,44 @@ class Mosaic {
   
   computeFastIndex()
   {
-    this.findSeeds()
-    this.distributeCollectionsItems()
+    return new Promise( (resolve, reject) => {
+      this.findSeeds()
+      this.indexCollectionsWithWorkers().then( () => resolve() )
+      //this.distributeCollectionsItems()
+    })
   }
   
-  distributeCollectionsItems()
-  {
-    if (this.seeds.length <= 0) {
-      console.error('No seeds, aborting')
-      return false
-    }
-    
-    let t0 = performance.now()
-    let tot = 0
-    this.indexedCollections = new Array(this.seeds.length)
-    this.seeds.forEach( (s,i) => {
-      this.indexedCollections[i] = []
-    })
-    
-    let func = (item, collec) => {
-      let idx = this.assignTileToSeed(item)
-      this.indexedCollections[idx].push({c:collec.name, d:item})
-      tot++
-    }
 
-    for (let key in this.collections) {
-      if(this.collections.hasOwnProperty(key)) {
-        let collec = this.collections[key]
-        collec.data.forEach( item => func(item, collec))
-      }
-    }
+  // distributeCollectionsItems()
+  // {
+  //   if (this.seeds.length <= 0) {
+  //     console.error('No seeds, aborting')
+  //     return false
+  //   }
     
-    let t1 = performance.now();
-    console.log("Indexing " + tot + " items took " + (t1 - t0) + " milliseconds.")
-  }
+  //   let t0 = performance.now()
+  //   let tot = 0
+  //   this.indexedCollections = new Array(this.seeds.length)
+  //   this.seeds.forEach( (s,i) => {
+  //     this.indexedCollections[i] = []
+  //   })
+    
+  //   let func = (item, collec) => {
+  //     let idx = this.assignTileToSeed(item)
+  //     this.indexedCollections[idx].push({c:collec.name, d:item})
+  //     tot++
+  //   }
+
+  //   for (let key in this.collections) {
+  //     if(this.collections.hasOwnProperty(key)) {
+  //       let collec = this.collections[key]
+  //       collec.data.forEach( item => func(item, collec))
+  //     }
+  //   }
+    
+  //   let t1 = performance.now();
+  //   console.log("Indexing " + tot + " items took " + (t1 - t0) + " milliseconds.")
+  // }
   
   findSeeds()
   {
@@ -157,6 +183,7 @@ class Mosaic {
   {
     let minDist = -1
     let seedi = -1
+    if (!this.seeds) console.error('No seeds')
     this.seeds.forEach( (s,i) => {
       let d = distance(t,s)
       if (minDist === -1 || d  < minDist) {
@@ -172,6 +199,7 @@ class Mosaic {
   {
     let minDist = Infinity
     let best = undefined
+    if (!tiles) console.error('No tiles')
     tiles.forEach( (tt,tti) => {
       let d = distance(t,tt.d)
       if (d  < minDist) {
