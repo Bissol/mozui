@@ -58,7 +58,7 @@ class MosaicPreview extends Component {
     console.log('Rendering mosaic preview')
     
     return (
-      <canvas ref="canvas" className="MosaicPreviewCanvas" width={this.props.width} height={this.props.height}/>
+        <canvas ref="canvas" className="MosaicPreviewCanvas" width={this.props.width} height={this.props.height}/>
     );
   }
 }

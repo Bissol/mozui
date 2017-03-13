@@ -28,6 +28,7 @@ function computeFastIndex()
   distributeCollectionsItems(seeds)
 }
   
+// Returns an array of array where collection items are reorganized according to seed similarity
 function distributeCollectionsItems(seeds, collections)
 {
   if (seeds.length <= 0) {
@@ -54,11 +55,36 @@ function distributeCollectionsItems(seeds, collections)
       collec.data.forEach( item => func(item, collec))
     }
   }
-  
+
   let t1 = performance.now();
   console.log("Indexing " + tot + " items took " + (t1 - t0) + " milliseconds.")
 
   return indexedCollections
+}
+
+
+// Returns an array where tiles are reorganized according to seed similarity
+function distributeTargetTiles(seeds, tiles) {
+  let result = new Array(seeds.length)
+  seeds.forEach( (s,i) => {
+     result[i] = []
+   })
+
+  tiles.forEach( (t, ti) => {
+    result[assignTileToSeed(t, seeds)].push({tile: t, index: ti})
+  })
+
+  return result
+}
+
+// input: {tile: colorinfo, index : idx} Result : {tile:, index:, match: indexedCollItem}
+function solveTiles(tilesWithIndex, indexedCollection) {
+  tilesWithIndex.forEach( (t, ti) => {
+    let best = findBestMatch(t.tile, indexedCollection)
+    tilesWithIndex[ti].match = best
+  })
+
+  return tilesWithIndex
 }
   
 function findSeeds(clusterer)
@@ -95,4 +121,4 @@ function findBestMatch(t, tiles)
   return best
 }
   
-export {serverRender, computeFastIndex, distributeCollectionsItems, findSeeds, assignTileToSeed, findBestMatch}
+export {serverRender, computeFastIndex, distributeCollectionsItems, distributeTargetTiles, findSeeds, assignTileToSeed, findBestMatch, solveTiles}

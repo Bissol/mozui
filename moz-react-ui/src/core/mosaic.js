@@ -1,7 +1,9 @@
 import Cluster from './cluster'
 import {distance} from './distance'
 import {serverRender, computeFastIndex, distributeCollectionsItems, findSeeds, assignTileToSeed, findBestMatch} from './mosaicFunctions.js'
-let IndexingWorker = require("./workers/indexCollectionsFromSeeds.w.js")
+let CollectionsIndexingWorker = require("./workers/indexCollectionsFromSeeds.w.js")
+let TargetTilesIndexingWorker = require("./workers/indexTilesFromSeeds.w.js")
+let SubSolverWorker = require("./workers/solveTilesSubset.w.js")
 
 class Mosaic {
   
@@ -21,7 +23,7 @@ class Mosaic {
 
   indexCollectionsWithWorkers() {
     return new Promise( (resolve, reject) => {
-      let worker = new IndexingWorker()
+      let worker = new CollectionsIndexingWorker()
       worker.postMessage({cmd: 'start', seeds: this.seeds, collections: this.collections})
       worker.addEventListener("message", (event) => {
         if (!event.data) reject('indexCollectionsWithWorkers: no data')
@@ -31,6 +33,61 @@ class Mosaic {
     })
   }
 
+  // Returns array (seed idx) of array of {tile:, index:}
+  indexTilesWithWorkers() {
+    return new Promise( (resolve, reject) => {
+      let worker = new TargetTilesIndexingWorker()
+      worker.postMessage({cmd: 'start', seeds: this.seeds, tiles: this.target.colorData})
+      worker.addEventListener("message", (event) => {
+        if (!event.data) reject('indexTilesWithWorkers: no data')
+        resolve(event.data.indexedTiles)
+      })
+    })
+  }
+
+  // Returns array of {tile:, index:, match:}
+  solveTilesSubsetWithWorkers(subset, indexedCollection) {
+    return new Promise( (resolve, reject) => {
+      console.log('Launching solver worker')
+      let worker = new SubSolverWorker()
+      worker.postMessage({cmd: 'start', tilesWithIndex: subset, indexedCollection: indexedCollection})
+      worker.addEventListener("message", (event) => {
+        if (!event.data) reject('indexTilesWithWorkers: no data')
+        console.log('Worker done')
+        resolve(event.data.solvedSubset)
+      })
+    })
+  }
+
+  // Lauches as many workers as seeds
+  makeWithWorkers() {
+
+    console.log('Starting mosaic (workers) with ncr=' + this.target.numColRow)
+    return new Promise( (resolve, reject) => {
+
+      if (!this.ready) reject('Not ready')
+
+      // Worker for distributing target tiles to n groups
+      this.indexTilesWithWorkers().then( (indexedTiles) => {
+        // Launch n workers with their own tiles group and own collection (mixed) 
+        Promise.all( indexedTiles.map( (sub, sub_i) => this.solveTilesSubsetWithWorkers(sub, this.indexedCollections[sub_i])) ).then( (solvedSubsets) => {
+          // Rebuild result from sub results
+          this.result.data = new Array(this.target.colorData.length)
+          this.result.w = this.target.numCol
+          this.result.h = this.target.numRow
+          solvedSubsets.forEach( (subset) => {
+            subset.forEach( (item) => {
+              this.result.data[item.index] = item.match
+            })
+          })
+          
+          this.serverRender()
+          resolve()
+        })
+      })
+    })
+    
+  }
   
   make()
   {
@@ -47,12 +104,9 @@ class Mosaic {
     })
   }
 
-  makeWithWorkers() {
+  
 
-    // Worker for distributing target tiles to n groups
 
-    // Launch n workers with their own tiles group and own collection (mixed)
-  }
 
   makeSingleThread()
   {

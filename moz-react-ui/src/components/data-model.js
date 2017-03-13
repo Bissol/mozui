@@ -118,7 +118,7 @@ class MosaicData {
 
   // Compute mosaic based on collections, target and current parameters
   computeMosaic() {
-  	return (this.mosaic && this.mosaic.ready) ? this.mosaic.make() : Promise.reject('No mosaic or mosaic not ready')
+  	return (this.mosaic && this.mosaic.ready) ? this.mosaic.makeWithWorkers() : Promise.reject('No mosaic or mosaic not ready')
   }
 
 }
