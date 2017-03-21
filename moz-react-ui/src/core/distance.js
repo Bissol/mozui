@@ -2,6 +2,7 @@
 function distance(t1, t2)
 {
   // {nbsub:this.matchSize*this.matchSize, avg: avgrgb, colors: colors}
+  if (!t1 || !t2) { debugger}
   if (t1.nbsub !== t2.nbsub) {
     console.log("Cant't compare tiles")
     return 1

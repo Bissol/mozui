@@ -7,7 +7,7 @@ self.addEventListener('message', function(e) {
 
   switch (data.cmd) {
     case 'start':
-      let res = mosaicFcts.distributeCollectionsItems(data.seeds, data.collections)
+      let res = mosaicFcts.distributeCollectionsItems(data.seeds, data.collections, data.allowTileFlip)
       self.postMessage({data : res})
       break;
     

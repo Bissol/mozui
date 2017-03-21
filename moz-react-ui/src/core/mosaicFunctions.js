@@ -27,9 +27,30 @@ function computeFastIndex()
   let seeds = findSeeds()
   distributeCollectionsItems(seeds)
 }
+
+function flipTile(tile) {
+  let flipped = JSON.parse(JSON.stringify(tile))
+  const size = Math.sqrt(tile.nbsub)
+  for (let k=0; k<tile.nbsub; k++) {
+    const x = Math.floor(k / size)
+    const y = k % size
+    flipped.colors[k] = tile.colors[((size - 1 - x) * size) + y]
+  }
+  // const numColRow = Math.sqrt(tile.nbsub)
+  // for (var si=0; si<numColRow; si++)
+  // {
+  //   for (var sj=0; sj<numColRow; sj++)
+  //   {
+  //     //flipped.colors[si*numColRow + sj] = tile.colors[si*numColRow + (numColRow - 1 - sj)]
+  //     flipped.colors[si*numColRow + sj] = tile.colors[si*numColRow + (numColRow - 1 - sj)]
+  //   }
+  // }
+
+  return flipped
+}
   
 // Returns an array of array where collection items are reorganized according to seed similarity
-function distributeCollectionsItems(seeds, collections)
+function distributeCollectionsItems(seeds, collections, allowTileFlip)
 {
   if (seeds.length <= 0) {
     console.error('No seeds, aborting')
@@ -43,16 +64,19 @@ function distributeCollectionsItems(seeds, collections)
     indexedCollections[i] = []
   })
   
-  let func = (item, collec) => {
+  let func = (item, collec, flipped) => {
     let idx = assignTileToSeed(item, seeds)
-    indexedCollections[idx].push({c:collec.name, d:item})
+    indexedCollections[idx].push({c:collec.name, d:item, f:flipped})
     tot++
   }
 
   for (let key in collections) {
     if(collections.hasOwnProperty(key)) {
       let collec = collections[key]
-      collec.data.forEach( item => func(item, collec))
+      collec.data.forEach( item => {
+        func(item, collec, false)
+        if (allowTileFlip) func(flipTile(item), collec, true)
+      })
     }
   }
 
@@ -121,4 +145,4 @@ function findBestMatch(t, tiles)
   return best
 }
   
-export {serverRender, computeFastIndex, distributeCollectionsItems, distributeTargetTiles, findSeeds, assignTileToSeed, findBestMatch, solveTiles}
+export {serverRender, computeFastIndex, distributeCollectionsItems, distributeTargetTiles, findSeeds, assignTileToSeed, findBestMatch, solveTiles, flipTile}

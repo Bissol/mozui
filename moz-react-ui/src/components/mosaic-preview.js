@@ -17,7 +17,8 @@ class MosaicPreview extends Component {
 
     if (this.props.previewData) {
 
-      let tileArray = this.props.previewData.data.map((e)=>(e.d))
+      //let tileArray = this.props.previewData.data.map((e)=>(e.d))
+      let tileArray = this.props.previewData.data
       let numCol = this.props.previewData.w
       let numRow = this.props.previewData.h
       let tileSize = numRow > numCol ? (this.props.width / numRow) : (this.props.height / numCol)
@@ -25,7 +26,8 @@ class MosaicPreview extends Component {
 
       for (var i=0; i<numCol; i++) {
         for (var j=0; j<numRow; j++) {
-          let tile = tileArray[i + numCol*j]
+          let tile = tileArray[i + numCol*j].d
+          let flipped = tileArray[i + numCol*j].f
           this.displayInCanvas(tile, context, i, j, tileSize)
         }
       }

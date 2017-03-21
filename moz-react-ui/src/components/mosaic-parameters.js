@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import './mosaic-parameters.css';
 import ParamMosaicSize from './param-mosaic-size.js';
+import ParamAllowTileFlip from './param-allow-tile-flip.js';
 
 class MosaicParameters extends Component {
 
@@ -8,7 +9,7 @@ class MosaicParameters extends Component {
     super(props)
 
     this.mosaicSizeChanged = this.mosaicSizeChanged.bind(this)
-
+    this.allowTileFlip = this.allowTileFlip.bind(this)
     
     const mode_DEFAULT = 'simple'
     this.state = 
@@ -32,6 +33,14 @@ class MosaicParameters extends Component {
     this.props.onParametersChanged(this.state.parameters, 'numColRow')
   }
 
+  allowTileFlip(val) {
+    let tmpState = this.state.parameters
+    tmpState.allowTileFlip = val
+    this.setState({parameters: tmpState})
+    localStorage.setItem('allowTileFlip', val)
+    this.props.onParametersChanged(this.state.parameters, 'allowTileFlip')
+  }
+
   render() {
     console.log('Rendering mosaic parameters in ' + this.state.mode + ' mode')
      
@@ -39,6 +48,7 @@ class MosaicParameters extends Component {
       <div className="MosaicParametersDiv">
         <span>Mode simple</span><input type="checkbox" defaultChecked={this.state.mode === 'simple'} onChange={() => this.toggleMode()}/>
         <ParamMosaicSize mode={this.state.mode} value={parseInt(this.state.parameters.numColRow, 10)} onMosaicSizeChanged={this.mosaicSizeChanged}/>
+        <ParamAllowTileFlip mode={this.state.mode} value={this.state.parameters.allowTileFlip} onAllowTileFlip={this.allowTileFlip} />
       </div>
     );
   }

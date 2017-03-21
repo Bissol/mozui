@@ -54,6 +54,9 @@ class App extends Component {
     if (changedParam === 'numColRow') {
       if (this.data.target) this.data.target.changeNumColRow(params.numColRow).then( () => {this.makeMosaic(true)})
     }
+    else if (changedParam === 'allowTileFlip') {
+      this.makeMosaic(true)
+    }
   }
 
   makeMosaic(init) {

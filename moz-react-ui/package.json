@@ -1,5 +1,6 @@
 {
   "name": "moz-react-ui",
+  "homepage": "http://debarena.com/mozreact",
   "version": "0.1.0",
   "private": true,
   "devDependencies": {

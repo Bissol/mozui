@@ -12,6 +12,7 @@ class Mosaic {
     this.target = target
     this.workers = []
     this.nbSeeds = 10
+    this.allowTileFlip = false
     this.seeds = []
     this.indexedCollections = []
     this.clusterer = new Cluster(this.target.colorData, this.nbSeeds)
@@ -24,7 +25,7 @@ class Mosaic {
   indexCollectionsWithWorkers() {
     return new Promise( (resolve, reject) => {
       let worker = new CollectionsIndexingWorker()
-      worker.postMessage({cmd: 'start', seeds: this.seeds, collections: this.collections})
+      worker.postMessage({cmd: 'start', seeds: this.seeds, collections: this.collections, allowTileFlip : this.allowTileFlip})
       worker.addEventListener("message", (event) => {
         if (!event.data) reject('indexCollectionsWithWorkers: no data')
         this.indexedCollections = event.data.data
