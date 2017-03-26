@@ -8,6 +8,14 @@ let jBinary = require('jbinary')
     tile: {charcount: 'uint8', name: ['string', 'charcount'], nbsub: 'uint8', avg: 'rgb', colors: ['array', 'rgb', 'nbsub']}
   };
 
+  // TypeSet Version 2
+  var typeSet_v2 = {
+    'jBinary.littleEndian': true,
+    header: {version : 'uint8', count: 'uint32'},
+    rgb: {r: 'uint8', g: 'uint8', b: 'uint8'},
+    tile: {name: 'uint16', nbsub: 'uint8', avg: 'rgb', colors: ['array', 'rgb', 'nbsub']}
+  };
+
 let baseUrl = "http://debarena.com/moz/data/tiles"
 
 
@@ -16,7 +24,7 @@ function loadCollectionJson(collectionName, callback)
   let t0 = performance.now()
   let url = baseUrl + '/' + collectionName + '/data.bin'
   
-  jBinary.load(url, typeSet, (err, binary) => {
+  jBinary.load(url, typeSet_v2, (err, binary) => {
     const head = binary.read('header')
     var res = {}
     res.name = collectionName
