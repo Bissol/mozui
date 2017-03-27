@@ -105,10 +105,6 @@ class Mosaic {
     })
   }
 
-  
-
-
-
   makeSingleThread()
   {
     let t0 = performance.now()
@@ -127,6 +123,7 @@ class Mosaic {
     return t1
   }
   
+  // ***************************** MAKING THE REAL THING ***************************************
   serverRender()
   {
     let t0 = performance.now()
@@ -156,37 +153,6 @@ class Mosaic {
     })
   }
   
-
-  // distributeCollectionsItems()
-  // {
-  //   if (this.seeds.length <= 0) {
-  //     console.error('No seeds, aborting')
-  //     return false
-  //   }
-    
-  //   let t0 = performance.now()
-  //   let tot = 0
-  //   this.indexedCollections = new Array(this.seeds.length)
-  //   this.seeds.forEach( (s,i) => {
-  //     this.indexedCollections[i] = []
-  //   })
-    
-  //   let func = (item, collec) => {
-  //     let idx = this.assignTileToSeed(item)
-  //     this.indexedCollections[idx].push({c:collec.name, d:item})
-  //     tot++
-  //   }
-
-  //   for (let key in this.collections) {
-  //     if(this.collections.hasOwnProperty(key)) {
-  //       let collec = this.collections[key]
-  //       collec.data.forEach( item => func(item, collec))
-  //     }
-  //   }
-    
-  //   let t1 = performance.now();
-  //   console.log("Indexing " + tot + " items took " + (t1 - t0) + " milliseconds.")
-  // }
   
   findSeeds()
   {
@@ -196,78 +162,7 @@ class Mosaic {
         console.log('Color data not present in target. Getting it now.')
       }
     
-    
     this.seeds = this.clusterer.getClusterCenters()
-    /*const firstSeedIndex = Math.floor(Math.random() * this.target.colorData.length)
-    this.seeds[0] = this.target.colorData[firstSeedIndex]
-    
-    for (var i=0; i<this.nbSeeds; i++) {
-      this.seeds.push(this.target.colorData[this.getOppositeSeedIdx()])
-    }*/
-    
-    /*for (var i=0; i<this.nbSeeds; i++) {
-      const ri = Math.floor(Math.random() * this.target.colorData.length)
-      this.seeds[i] = this.target.colorData[ri]
-    }*/
-  }
-  
- /* getOppositeSeedIdx()
-  {
-    let opidx = -1
-    let maxDist = 0
-    this.target.colorData.forEach( (el, eli) => {
-      // Comp dist between el and other seeds
-      let d = 0
-      let sumi = 0
-      this.seeds.forEach(function(see, isee) {
-        d += (isee+1) * distance(el,see)
-        sumi += isee+1
-      })
-      d = d / sumi
-      
-      if (d > maxDist) {
-        maxDist = d
-        opidx = eli
-      }
-    })
-    
-    return opidx
-  }*/
-  
-  assignTileToSeed(t)
-  {
-    let minDist = -1
-    let seedi = -1
-    if (!this.seeds) console.error('No seeds')
-    this.seeds.forEach( (s,i) => {
-      let d = distance(t,s)
-      if (minDist === -1 || d  < minDist) {
-        minDist = d
-        seedi = i
-      }
-    })
-    
-    return seedi
-  }
-  
-  findBestMatch(t, tiles)
-  {
-    let minDist = Infinity
-    let best = undefined
-    if (!tiles) console.error('No tiles')
-    tiles.forEach( (tt,tti) => {
-      let d = distance(t,tt.d)
-      if (d  < minDist) {
-        minDist = d
-        best = tiles[tti]
-      }
-    })
-    return best
-  }
-  
-  setupWorkers()
-  {
-    
   }
 }
 

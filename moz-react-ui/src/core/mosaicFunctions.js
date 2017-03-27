@@ -36,15 +36,6 @@ function flipTile(tile) {
     const y = k % size
     flipped.colors[k] = tile.colors[((size - 1 - x) * size) + y]
   }
-  // const numColRow = Math.sqrt(tile.nbsub)
-  // for (var si=0; si<numColRow; si++)
-  // {
-  //   for (var sj=0; sj<numColRow; sj++)
-  //   {
-  //     //flipped.colors[si*numColRow + sj] = tile.colors[si*numColRow + (numColRow - 1 - sj)]
-  //     flipped.colors[si*numColRow + sj] = tile.colors[si*numColRow + (numColRow - 1 - sj)]
-  //   }
-  // }
 
   return flipped
 }
