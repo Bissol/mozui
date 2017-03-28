@@ -45,7 +45,7 @@ class MosaicParameters extends Component {
     console.log('Rendering mosaic parameters in ' + this.state.mode + ' mode')
      
     return (
-      <div className="MosaicParametersDiv">
+      <div id="MosaicParametersDiv">
         <span>Mode simple</span><input type="checkbox" defaultChecked={this.state.mode === 'simple'} onChange={() => this.toggleMode()}/>
         <ParamMosaicSize mode={this.state.mode} value={parseInt(this.state.parameters.numColRow, 10)} onMosaicSizeChanged={this.mosaicSizeChanged}/>
         <ParamAllowTileFlip mode={this.state.mode} value={this.state.parameters.allowTileFlip} onAllowTileFlip={this.allowTileFlip} />

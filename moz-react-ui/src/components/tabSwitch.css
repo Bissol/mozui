@@ -1,0 +1,24 @@
+/*tabSwitch.css*/
+
+#TabSwitch {
+  background-color: #FDD;
+  width: 100%;
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-start;
+}
+
+#TabSwitch input[type=radio]{
+  position: absolute;
+  visibility: hidden;
+}
+
+#TabSwitch label{
+  padding: 5px 10px;
+  cursor: pointer;
+}
+
+input[type=radio]:checked + label {
+  background-color: #f00;
+  font-weight: bold;
+}

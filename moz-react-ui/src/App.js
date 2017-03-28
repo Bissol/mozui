@@ -4,6 +4,7 @@ import CollectionPicker from './components/collection-picker'
 import TargetImage from './components/target-image'
 import MosaicParameters from './components/mosaic-parameters'
 import MosaicPreview from './components/mosaic-preview'
+import TabSwitch from './components/tabSwitch'
 import './App.css';
 
 class App extends Component {
@@ -85,14 +86,22 @@ class App extends Component {
     )
   }
 
+  tabChanged(tid) {
+    console.log('TODO: change tab!')
+  }
+
   render() {
 
     return (
-      <div className="App">
+      <div className="App" id="appMainContainer">
         <MosaicParameters initialParameters={this.data.parameters} onParametersChanged={this.parametersChanged}/>
-        <TargetImage targetImage={this.state.targetData} onTargetImageChanged={this.targetImageChanged}/>
-        <MosaicPreview width={600} height={600} previewData={this.state.previewData}/>
         <CollectionPicker collections={this.state.collectionMetadata} onCollectionSelected={this.collectionChecked} />
+        <TabSwitch onTabChanged={this.tabChanged} />
+        <div id="tabs">
+          <div id="targetImage"><TargetImage targetImage={this.state.targetData} onTargetImageChanged={this.targetImageChanged}/></div>
+          <div id="mosaicPreview"><MosaicPreview width={600} height={600} previewData={this.state.previewData}/></div>
+        </div>
+        
       </div>
     )
   }

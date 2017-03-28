@@ -1,24 +1,22 @@
-.App {
-  text-align: center;
+#appMainContainer {
+  display: flex;
+  flex-wrap: wrap;
 }
 
-.App-logo {
-  animation: App-logo-spin infinite 20s linear;
-  height: 80px;
+#tabs {
+  position: relative;
+  width: 100%;
+  background-color: #FDF;
 }
 
-.App-header {
-  background-color: #222;
-  height: 150px;
-  padding: 20px;
-  color: white;
+#targetImage {
+  position:relative;
+  top: 0px;
+  left: 0px;
 }
 
-.App-intro {
-  font-size: large;
-}
-
-@keyframes App-logo-spin {
-  from { transform: rotate(0deg); }
-  to { transform: rotate(360deg); }
+#mosaicPreview {
+  position:relative;
+  top: 0px;
+  left: 0px;
 }

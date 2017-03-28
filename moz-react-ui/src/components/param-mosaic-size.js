@@ -34,19 +34,18 @@ class ParamMosaicSize extends Component {
   render() {
     let Input = ''
     if (this.props.mode && this.props.mode === 'expert') {
-      Input = <span><input type='number' min='10' max='80' defaultValue={this.props.value} ref='expertSize' onChange={() => this.paramChanged()}/></span>;
+      Input = <span><input type='number' min='10' max='80' defaultValue={this.props.value} ref='expertSize' onChange={() => this.paramChanged()}/> tuiles sur bord long</span>;
     }
     else if (this.props.mode === 'simple') {
-      Input = <span><input type="radio" name="simpleSize" value={this.SMALL_MOZAIC} defaultChecked={this.props.value === this.SMALL_MOZAIC} onChange={() => this.paramChanged(this.SMALL_MOZAIC)}/><span>Priorité petites images</span>
-                    <input type="radio" name="simpleSize" value={this.AVERAGE_MOZAIC} defaultChecked={this.props.value === this.AVERAGE_MOZAIC} onChange={() => this.paramChanged(this.AVERAGE_MOZAIC)} /><span>Equilibré</span>
-                    <input type="radio" name="simpleSize" value={this.LARGE_MOZAIC} defaultChecked={this.props.value === this.LARGE_MOZAIC} onChange={() => this.paramChanged(this.LARGE_MOZAIC)} /><span>Priorité image globale</span></span>
+      Input = <span><input type="radio" name="simpleSize" value={this.SMALL_MOZAIC} defaultChecked={this.props.value === this.SMALL_MOZAIC} onChange={() => this.paramChanged(this.SMALL_MOZAIC)}/><span>petit</span>
+                    <input type="radio" name="simpleSize" value={this.AVERAGE_MOZAIC} defaultChecked={this.props.value === this.AVERAGE_MOZAIC} onChange={() => this.paramChanged(this.AVERAGE_MOZAIC)} /><span>moyen</span>
+                    <input type="radio" name="simpleSize" value={this.LARGE_MOZAIC} defaultChecked={this.props.value === this.LARGE_MOZAIC} onChange={() => this.paramChanged(this.LARGE_MOZAIC)} /><span>grand</span></span>
     }
     else {console.error('Bad mode')}
 
     return (
       <div className='ParamMosaicSize'>
-        <p>Choix du quadrillage</p>
-        {Input}
+        Taille : {Input}
       </div>
     );
   }
