@@ -10,13 +10,21 @@
 }
 
 #targetImage {
-  position:relative;
+  position:absolute;
   top: 0px;
   left: 0px;
 }
 
 #mosaicPreview {
-  position:relative;
+  position:absolute;
   top: 0px;
   left: 0px;
+}
+
+.shownTab {
+  display: block;
+}
+
+.hiddenTab {
+  display: none;
 }

@@ -16,12 +16,14 @@ class App extends Component {
     this.state = {
       collectionMetadata : this.data.collectionsMetadata,
        targetData : this.data.target,
-       previewData : undefined
+       previewData : undefined,
+       currentTab: 'tab-target'
      }
 
     this.collectionChecked = this.collectionChecked.bind(this)
     this.targetImageChanged = this.targetImageChanged.bind(this)
     this.parametersChanged = this.parametersChanged.bind(this)
+    this.tabChanged = this.tabChanged.bind(this)
   }
 
   componentDidMount() {
@@ -87,7 +89,7 @@ class App extends Component {
   }
 
   tabChanged(tid) {
-    console.log('TODO: change tab!')
+    this.setState({ currentTab: tid})
   }
 
   render() {
@@ -98,8 +100,12 @@ class App extends Component {
         <CollectionPicker collections={this.state.collectionMetadata} onCollectionSelected={this.collectionChecked} />
         <TabSwitch onTabChanged={this.tabChanged} />
         <div id="tabs">
-          <div id="targetImage"><TargetImage targetImage={this.state.targetData} onTargetImageChanged={this.targetImageChanged}/></div>
-          <div id="mosaicPreview"><MosaicPreview width={600} height={600} previewData={this.state.previewData}/></div>
+          <div id="targetImage" className={this.state.currentTab === 'tab-target' ? 'shownTab' : 'hiddenTab'}>
+            <TargetImage targetImage={this.state.targetData} onTargetImageChanged={this.targetImageChanged}/>
+          </div>
+          <div id="mosaicPreview" className={this.state.currentTab === 'tab-preview' ? 'shownTab' : 'hiddenTab'}>
+            <MosaicPreview width={800} height={600} previewData={this.state.previewData}/>
+          </div>
         </div>
         
       </div>
