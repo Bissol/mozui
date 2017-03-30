@@ -1,6 +1,9 @@
+//let targetFcts = require('./targetFunctions.js')
+let ExtractTargetColorsWorker = require("./workers/extractTargetColors.w.js")
+
 class Target {
   
-  constructor(imageSrcData, callback, initialNumColRow) {
+  constructor(imageSrcData, callback, initialNumColRow, progressCallback) {
     this.ready = false
     this.imageSrcData = imageSrcData
     this.imageElement = new Image()
@@ -24,9 +27,24 @@ class Target {
       this.canvas.height = this.height
       this.context.drawImage(this.imageElement, 0, 0)
       this.setNumColRow(this.numColRow)
-      this.extractColorInfo()
-      this.ready = true
-      callback()
+      //this.colorData = targetFcts.extractColorInfo(this.imageElement, this.numCol, this.numRow, this.tileSize, this.matchSize, this.pixSampling)
+      //this.extractColorInfo()
+      let pixels = this.context.getImageData(0, 0, this.imageElement.width, this.imageElement.height)
+      let worker = new ExtractTargetColorsWorker()
+      worker.postMessage({cmd: 'start', pixels : pixels, width: this.width, height: this.height, numCol : this.numCol, numRow : this.numRow, tileSize : this.tileSize, matchSize : this.matchSize, pixSampling : this.pixSampling})
+      worker.addEventListener("message", (event) => {
+        if (event.data.type === 'progress') {
+          progressCallback(event.data.percent)
+        }
+        else if (event.data.type === 'result') {
+          this.colorData = event.data.data
+          this.ready = true
+          callback()
+        }
+      })
+
+      //this.ready = true
+      //callback()
     }
     this.imageElement.src = imageSrcData
   }

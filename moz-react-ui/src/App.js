@@ -18,7 +18,10 @@ class App extends Component {
       collectionMetadata : this.data.collectionsMetadata,
        targetData : this.data.target,
        previewData : undefined,
-       currentTab: 'tab-target'
+       currentTab: 'tab-target',
+       busy: false,
+       currentTask: "",
+       progressPercent: 0
      }
 
     this.collectionChecked = this.collectionChecked.bind(this)
@@ -43,11 +46,19 @@ class App extends Component {
 
   targetImageChanged(imgData) {
     console.log('Target image changed')
+    this.setState({busy : true, currentTask : "Traitement de l'image"})
+
     let done = () => {
       this.setState({targetData : this.data.target})
+      this.setState({busy : false})
       this.makeMosaic(true)
     }
-    this.data.setTarget(imgData, done)
+
+    let callbackProgress = (percent) => {
+      this.setState({progressPercent : percent})
+    }
+
+    this.data.setTarget(imgData, done, callbackProgress)
   }
 
   parametersChanged(params, changedParam) {
@@ -97,7 +108,7 @@ class App extends Component {
 
     return (
       <div className="App" id="appMainContainer">
-        <Progress busy='false' message='Tranquille Emile' />
+        <Progress busy={this.state.busy} message={this.state.currentTask} percent={this.state.progressPercent} />
         <MosaicParameters initialParameters={this.data.parameters} onParametersChanged={this.parametersChanged}/>
         <CollectionPicker collections={this.state.collectionMetadata} onCollectionSelected={this.collectionChecked} />
         <TabSwitch onTabChanged={this.tabChanged} />

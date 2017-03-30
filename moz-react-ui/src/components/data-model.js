@@ -30,8 +30,8 @@ class MosaicData {
         }
   }
  
-  setTarget(imgData, callback) {
-    this.target = new Target(imgData, callback, this.parameters.numColRow)
+  setTarget(imgData, callback, callbackProgress) {
+    this.target = new Target(imgData, callback, this.parameters.numColRow, callbackProgress)
   }
 
   initializeCollections() {

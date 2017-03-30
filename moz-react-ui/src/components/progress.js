@@ -9,6 +9,7 @@ class Progress extends Component {
       <div className={this.props.busy ? 'busy' : 'idle'} id='Progress'>
         <img src='/squares.gif' />
         <p>{this.props.message}</p>
+        <p>{this.props.percent}%</p>
       </div>
     );
   }
