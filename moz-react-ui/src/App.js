@@ -5,6 +5,7 @@ import TargetImage from './components/target-image'
 import MosaicParameters from './components/mosaic-parameters'
 import MosaicPreview from './components/mosaic-preview'
 import TabSwitch from './components/tabSwitch'
+import Progress from './components/progress'
 import './App.css';
 
 class App extends Component {
@@ -96,6 +97,7 @@ class App extends Component {
 
     return (
       <div className="App" id="appMainContainer">
+        <Progress busy='false' message='Tranquille Emile' />
         <MosaicParameters initialParameters={this.data.parameters} onParametersChanged={this.parametersChanged}/>
         <CollectionPicker collections={this.state.collectionMetadata} onCollectionSelected={this.collectionChecked} />
         <TabSwitch onTabChanged={this.tabChanged} />
