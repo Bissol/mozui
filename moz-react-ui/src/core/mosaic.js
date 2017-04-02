@@ -96,7 +96,7 @@ class Mosaic {
             })
           })
           
-          this.serverRender()
+          //this.serverRender()
           resolve()
         })
       })
@@ -140,22 +140,26 @@ class Mosaic {
   // ***************************** MAKING THE REAL THING ***************************************
   serverRender()
   {
-    let t0 = performance.now()
-    let baseUrl = "http://debarena.com/moz/php"
-    var XHR = new XMLHttpRequest()
-    XHR.addEventListener('load', function(event) {
-      console.log(XHR.responseText)
-      let t1 = performance.now()
-      console.log("Rendering mosaic took " + (t1 - t0) + " milliseconds.")
+    return new Promise( (resolve, reject) => {
+      let t0 = performance.now()
+      let baseUrl = "http://debarena.com/moz/php"
+      var XHR = new XMLHttpRequest()
+      XHR.addEventListener('load', function(event) {
+        //console.log(XHR.responseText)
+        let src = "data:image/jpeg;base64," + XHR.responseText
+        let t1 = performance.now()
+        console.log("Rendering mosaic took " + (t1 - t0) + " milliseconds.")
+        resolve(src)
+      })
+      
+      XHR.addEventListener('error', function(event) {
+        alert('Oups! Something goes wrong.')
+      })
+      
+      XHR.open('post', baseUrl + '/serverRender.php', true)
+      XHR.setRequestHeader("Content-type", "application/json")
+      XHR.send(encodeURIComponent(JSON.stringify(this.result)))
     })
-    
-    XHR.addEventListener('error', function(event) {
-      alert('Oups! Something goes wrong.')
-    })
-    
-    XHR.open('post', baseUrl + '/serverRender.php', true)
-    XHR.setRequestHeader("Content-type", "application/json")
-    XHR.send(encodeURIComponent(JSON.stringify(this.result)))
   }
   
   computeFastIndex()

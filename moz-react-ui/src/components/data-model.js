@@ -126,6 +126,25 @@ class MosaicData {
   	return (this.mosaic && this.mosaic.ready) ? this.mosaic.makeWithWorkers(progressCallback) : Promise.reject('No mosaic or mosaic not ready')
   }
 
+  // Render mosaic on server
+  renderLowResMosaic() {
+
+    return new Promise( (resolve, reject) => {
+
+      if (this.mosaic.result) {
+        this.mosaic.serverRender().then( (src) => {
+          resolve(src)
+        }, () => {
+          reject("Erreur lors de la génération de la mosaïque")
+        })
+      }
+      else {
+        reject("Pas de mosaïque à générer")
+      }
+
+    })
+  }
+
 }
 
 export default MosaicData

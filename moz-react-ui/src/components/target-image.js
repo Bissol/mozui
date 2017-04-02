@@ -30,7 +30,7 @@ class TargetImage extends PureComponent {
     return (
       <div className="TargetImageDiv">
         <input ref="targetImageInput" type="file" accept="image/*" onChange={ () => {this.targetChanged()} } />
-        <img src={this.props.targetImage ? this.props.targetImage.imageSrcData : 'defaultimagetodo'} alt="La cible de ma mosaique !" className="TargetImage"/>
+        <img src={this.props.targetImage ? this.props.targetImage.imageSrcData : '/placeholder.jpg'} alt="La cible de ma mosaique !" className="TargetImage"/>
       </div>
     );
   }

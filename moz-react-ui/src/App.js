@@ -4,6 +4,7 @@ import CollectionPicker from './components/collection-picker'
 import TargetImage from './components/target-image'
 import MosaicParameters from './components/mosaic-parameters'
 import MosaicPreview from './components/mosaic-preview'
+import MosaicLowRes from './components/mosaic-low-res'
 import TabSwitch from './components/tabSwitch'
 import Progress from './components/progress'
 import './App.css';
@@ -22,7 +23,8 @@ class App extends Component {
        busy: false,
        currentTask: "",
        progressPercent: 0,
-       hidePercent : false
+       hidePercent : false,
+       srcMosaicLowres : null
      }
 
     this.collectionChecked = this.collectionChecked.bind(this)
@@ -117,6 +119,14 @@ class App extends Component {
 
   tabChanged(tid) {
     this.setState({ currentTab: tid})
+
+    // If user selects mosaic tab, generate it!
+    if (tid ==='tab-lowres') {
+      console.log('Server render launched')
+      this.data.renderLowResMosaic().then( (src) => {
+        this.setState({srcMosaicLowres : src})
+      })
+    }
   }
 
   render() {
@@ -126,13 +136,16 @@ class App extends Component {
         <Progress hidePercent={this.state.hidePercent} busy={this.state.busy} message={this.state.currentTask} percent={this.state.progressPercent} />
         <MosaicParameters initialParameters={this.data.parameters} onParametersChanged={this.parametersChanged}/>
         <CollectionPicker collections={this.state.collectionMetadata} onCollectionSelected={this.collectionChecked} />
-        <TabSwitch onTabChanged={this.tabChanged} />
+        <TabSwitch selectedTab={this.state.currentTab} onTabChanged={this.tabChanged} />
         <div id="tabs">
           <div id="targetImage" className={this.state.currentTab === 'tab-target' ? 'shownTab' : 'hiddenTab'}>
             <TargetImage targetImage={this.state.targetData} onTargetImageChanged={this.targetImageChanged}/>
           </div>
           <div id="mosaicPreview" className={this.state.currentTab === 'tab-preview' ? 'shownTab' : 'hiddenTab'}>
             <MosaicPreview width={800} height={600} previewData={this.state.previewData}/>
+          </div>
+          <div id="mosaicLowres" className={this.state.currentTab === 'tab-lowres' ? 'shownTab' : 'hiddenTab'}>
+            <MosaicLowRes imageSrc={this.state.srcMosaicLowres} />
           </div>
         </div>
         
