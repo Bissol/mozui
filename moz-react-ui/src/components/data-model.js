@@ -115,13 +115,15 @@ class MosaicData {
     		if (!selectionOfCollections) {console.error('Could not initialize mosaic')}
     		else if (Object.keys(selectionOfCollections).length <= 0) {console.log('No collection selected')}
     		else if (!this.target) {console.error('Target image not ready')}
+
+        reject("Mosaïque non initialisée")
     	}
     })
   }
 
   // Compute mosaic based on collections, target and current parameters
-  computeMosaic() {
-  	return (this.mosaic && this.mosaic.ready) ? this.mosaic.makeWithWorkers() : Promise.reject('No mosaic or mosaic not ready')
+  computeMosaic(progressCallback) {
+  	return (this.mosaic && this.mosaic.ready) ? this.mosaic.makeWithWorkers(progressCallback) : Promise.reject('No mosaic or mosaic not ready')
   }
 
 }

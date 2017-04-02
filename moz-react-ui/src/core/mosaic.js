@@ -47,23 +47,37 @@ class Mosaic {
   }
 
   // Returns array of {tile:, index:, match:}
-  solveTilesSubsetWithWorkers(subset, indexedCollection) {
+  solveTilesSubsetWithWorkers(worker_id, subset, indexedCollection, progressCallback) {
     return new Promise( (resolve, reject) => {
       console.log('Launching solver worker')
       let worker = new SubSolverWorker()
-      worker.postMessage({cmd: 'start', tilesWithIndex: subset, indexedCollection: indexedCollection})
+      worker.postMessage({cmd: 'start', worker_id: worker_id, tilesWithIndex: subset, indexedCollection: indexedCollection})
       worker.addEventListener("message", (event) => {
-        if (!event.data) reject('indexTilesWithWorkers: no data')
-        console.log('Worker done')
-        resolve(event.data.solvedSubset)
+        if (event.data.type === 'result') {
+          console.log('Worker done')
+          resolve(event.data.solvedSubset)
+        }
+        else if (event.data.type === 'progress') {
+          progressCallback(event.data.worker_id, event.data.percent)
+        }
       })
     })
   }
 
   // Lauches as many workers as seeds
-  makeWithWorkers() {
+  makeWithWorkers(mainProgressCallback) {
 
     console.log('Starting mosaic (workers) with ncr=' + this.target.numColRow)
+
+    let workersCompletion = new Array(this.nbSeeds)
+    let progressCallback = (worker_id, percent) => {
+      workersCompletion[worker_id] = percent
+      //console.log("Worker #" + worker_id + " is " + percent + " done")
+      let avg = Math.round(workersCompletion.reduce( (a,b) => {return a+b}) / this.nbSeeds)
+
+      mainProgressCallback(avg)
+    }
+
     return new Promise( (resolve, reject) => {
 
       if (!this.ready) reject('Not ready')
@@ -71,7 +85,7 @@ class Mosaic {
       // Worker for distributing target tiles to n groups
       this.indexTilesWithWorkers().then( (indexedTiles) => {
         // Launch n workers with their own tiles group and own collection (mixed) 
-        Promise.all( indexedTiles.map( (sub, sub_i) => this.solveTilesSubsetWithWorkers(sub, this.indexedCollections[sub_i])) ).then( (solvedSubsets) => {
+        Promise.all( indexedTiles.map( (sub, sub_i) => this.solveTilesSubsetWithWorkers(sub_i, sub, this.indexedCollections[sub_i], progressCallback)) ).then( (solvedSubsets) => {
           // Rebuild result from sub results
           this.result.data = new Array(this.target.colorData.length)
           this.result.w = this.target.numCol

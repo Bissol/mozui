@@ -21,7 +21,8 @@ class App extends Component {
        currentTab: 'tab-target',
        busy: false,
        currentTask: "",
-       progressPercent: 0
+       progressPercent: 0,
+       hidePercent : false
      }
 
     this.collectionChecked = this.collectionChecked.bind(this)
@@ -38,15 +39,17 @@ class App extends Component {
   }
 
   collectionChecked(collectionMetadata) {
+    this.setState({hidePercent: true, busy : true, currentTask : "Chargement de la collection " + collectionMetadata.name_fr})
     this.data.selectCollection(collectionMetadata).then( (collection) => {
       this.setState({collectionMetadata: this.data.collectionsMetadata})
+      this.setState({busy : false})
       this.makeMosaic(true)
     })
   }
 
   targetImageChanged(imgData) {
     console.log('Target image changed')
-    this.setState({busy : true, currentTask : "Traitement de l'image"})
+    this.setState({progressPercent : 0, hidePercent: false, busy : true, currentTask : "Traitement de l'image"})
 
     let done = () => {
       this.setState({targetData : this.data.target})
@@ -77,8 +80,12 @@ class App extends Component {
   makeMosaic(init) {
 
     if (init) {
+      this.setState({hidePercent: true, busy : true, currentTask : "Optimisation..."})
       this.data.initMosaic().then( () => {
+        this.setState({busy : false, currentTask : "Optimisation terminée"})
         this.makeMosaicPromise()
+      }, () => {
+        this.setState({busy : false, currentTask : "Optimisation terminée"})
       })
     }
     else {
@@ -89,8 +96,16 @@ class App extends Component {
   }
 
   makeMosaicPromise() {
-    this.data.computeMosaic().then( 
+
+    let progressCallback = (percent) => {
+      this.setState({progressPercent : percent})
+    }
+
+    this.setState({progressPercent : 0, hidePercent: false, busy : true, currentTask : "Création de la mosaïque"})
+
+    this.data.computeMosaic(progressCallback).then( 
       (compTime) => {
+        this.setState({busy : false})
         console.log('Mosaic successfully generated')
         this.setState({ previewData : this.data.mosaic.result })
       }, 
@@ -108,7 +123,7 @@ class App extends Component {
 
     return (
       <div className="App" id="appMainContainer">
-        <Progress busy={this.state.busy} message={this.state.currentTask} percent={this.state.progressPercent} />
+        <Progress hidePercent={this.state.hidePercent} busy={this.state.busy} message={this.state.currentTask} percent={this.state.progressPercent} />
         <MosaicParameters initialParameters={this.data.parameters} onParametersChanged={this.parametersChanged}/>
         <CollectionPicker collections={this.state.collectionMetadata} onCollectionSelected={this.collectionChecked} />
         <TabSwitch onTabChanged={this.tabChanged} />

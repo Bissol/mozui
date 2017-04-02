@@ -7,9 +7,11 @@ class Progress extends Component {
     
     return (
       <div className={this.props.busy ? 'busy' : 'idle'} id='Progress'>
-        <img src='/squares.gif' />
-        <p>{this.props.message}</p>
-        <p>{this.props.percent}%</p>
+      	<div className='progressInfo'>
+	        <img src='/squares.gif' />
+	        <p>{this.props.message}</p>
+	        <p className={this.props.hidePercent ? 'percentHidden' : 'percentShown'}>{this.props.percent}%</p>
+	     </div>
       </div>
     );
   }

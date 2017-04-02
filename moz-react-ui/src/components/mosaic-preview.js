@@ -1,7 +1,7 @@
-import React, { Component } from 'react';
+import React, { PureComponent } from 'react';
 import './mosaic-preview.css';
 
-class MosaicPreview extends Component {
+class MosaicPreview extends PureComponent {
 
   componentDidMount() {
     this.drawPreview()

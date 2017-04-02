@@ -1,9 +1,9 @@
-import React, { Component } from 'react';
+import React, { PureComponent } from 'react';
 import './mosaic-parameters.css';
 import ParamMosaicSize from './param-mosaic-size.js';
 import ParamAllowTileFlip from './param-allow-tile-flip.js';
 
-class MosaicParameters extends Component {
+class MosaicParameters extends PureComponent {
 
   constructor(props) {
     super(props)

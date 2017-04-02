@@ -93,10 +93,12 @@ function distributeTargetTiles(seeds, tiles) {
 }
 
 // input: {tile: colorinfo, index : idx} Result : {tile:, index:, match: indexedCollItem}
-function solveTiles(tilesWithIndex, indexedCollection) {
+function solveTiles(tilesWithIndex, indexedCollection, progressCallback) {
+  const tot = tilesWithIndex.length
   tilesWithIndex.forEach( (t, ti) => {
     let best = findBestMatch(t.tile, indexedCollection)
     tilesWithIndex[ti].match = best
+    if (ti % 10 === 0) progressCallback( (ti / tot) * 100 )
   })
 
   return tilesWithIndex
