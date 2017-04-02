@@ -19,6 +19,8 @@ class MosaicParameters extends PureComponent {
     }
   }
 
+  // =================================================================== PARAMETERS ============================================================
+
   toggleMode() {
     const newMode = this.state.mode === 'simple' ? 'expert' : 'simple'
     this.setState({mode: newMode})
@@ -41,6 +43,14 @@ class MosaicParameters extends PureComponent {
     this.props.onParametersChanged(this.state.parameters, 'allowTileFlip')
   }
 
+  // =================================================================== ACTIONS ============================================================
+
+  buildMosaic() {
+    console.log('click')
+    this.props.onBuildMosaic()
+  }
+
+  // =================================================================== RENDERING ============================================================
   render() {
     console.log('Rendering mosaic parameters in ' + this.state.mode + ' mode')
      
@@ -49,6 +59,9 @@ class MosaicParameters extends PureComponent {
         <span>Mode simple</span><input type="checkbox" defaultChecked={this.state.mode === 'simple'} onChange={() => this.toggleMode()}/>
         <ParamMosaicSize mode={this.state.mode} value={parseInt(this.state.parameters.numColRow, 10)} onMosaicSizeChanged={this.mosaicSizeChanged}/>
         <ParamAllowTileFlip mode={this.state.mode} value={this.state.parameters.allowTileFlip} onAllowTileFlip={this.allowTileFlip} />
+        <div className='actions'>
+          <button onClick={() => this.buildMosaic()}>Créer ma mosaïque</button>
+        </div>
       </div>
     );
   }

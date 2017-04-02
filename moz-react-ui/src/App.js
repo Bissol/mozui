@@ -31,6 +31,7 @@ class App extends Component {
     this.targetImageChanged = this.targetImageChanged.bind(this)
     this.parametersChanged = this.parametersChanged.bind(this)
     this.tabChanged = this.tabChanged.bind(this)
+    this.makeMosaic = this.makeMosaic.bind(this)
   }
 
   componentDidMount() {
@@ -40,15 +41,17 @@ class App extends Component {
       })
   }
 
+  // ================================================ CHANGING COLLECTIONS ==================================================
   collectionChecked(collectionMetadata) {
     this.setState({hidePercent: true, busy : true, currentTask : "Chargement de la collection " + collectionMetadata.name_fr})
     this.data.selectCollection(collectionMetadata).then( (collection) => {
       this.setState({collectionMetadata: this.data.collectionsMetadata})
       this.setState({busy : false})
-      this.makeMosaic(true)
+      //this.makeMosaic(true)
     })
   }
 
+  // ================================================ CHANGING TARGET IMAGE ============================================
   targetImageChanged(imgData) {
     console.log('Target image changed')
     this.setState({progressPercent : 0, hidePercent: false, busy : true, currentTask : "Traitement de l'image"})
@@ -56,7 +59,7 @@ class App extends Component {
     let done = () => {
       this.setState({targetData : this.data.target})
       this.setState({busy : false})
-      this.makeMosaic(true)
+      //this.makeMosaic(true)
     }
 
     let callbackProgress = (percent) => {
@@ -66,22 +69,33 @@ class App extends Component {
     this.data.setTarget(imgData, done, callbackProgress)
   }
 
+  // ================================================ CHANGING PARAMS ==================================================
   parametersChanged(params, changedParam) {
+
     console.log('[App] Parameters changed:')
     console.log(params)
     this.data.parameters = params
 
+    let callbackProgress = (percent) => {
+      this.setState({progressPercent : percent})
+    }
+
     if (changedParam === 'numColRow') {
-      if (this.data.target) this.data.target.changeNumColRow(params.numColRow).then( () => {this.makeMosaic(true)})
+      if (this.data.target) {
+        this.setState({progressPercent : 0, hidePercent: false, busy : true, currentTask : "Extraction des couleurs"})
+        this.data.target.changeNumColRow(params.numColRow, callbackProgress).then( () => {
+          this.setState({busy : false})
+        })
+      }
     }
     else if (changedParam === 'allowTileFlip') {
-      this.makeMosaic(true)
+      //this.makeMosaic(true)
     }
   }
 
-  makeMosaic(init) {
+  makeMosaic() {
 
-    if (init) {
+    if (this.data.mustReindex === true) {
       this.setState({hidePercent: true, busy : true, currentTask : "Optimisation..."})
       this.data.initMosaic().then( () => {
         this.setState({busy : false, currentTask : "Optimisation terminée"})
@@ -109,7 +123,7 @@ class App extends Component {
       (compTime) => {
         this.setState({busy : false})
         console.log('Mosaic successfully generated')
-        this.setState({ previewData : this.data.mosaic.result })
+        this.setState({ previewData : this.data.mosaic.result, previewTimestamp: Date.now() })
       }, 
       (err) => {
         console.error('Error while generating mosaic: ' + err)
@@ -134,7 +148,7 @@ class App extends Component {
     return (
       <div className="App" id="appMainContainer">
         <Progress hidePercent={this.state.hidePercent} busy={this.state.busy} message={this.state.currentTask} percent={this.state.progressPercent} />
-        <MosaicParameters initialParameters={this.data.parameters} onParametersChanged={this.parametersChanged}/>
+        <MosaicParameters initialParameters={this.data.parameters} onParametersChanged={this.parametersChanged} onBuildMosaic={this.makeMosaic} />
         <CollectionPicker collections={this.state.collectionMetadata} onCollectionSelected={this.collectionChecked} />
         <TabSwitch selectedTab={this.state.currentTab} onTabChanged={this.tabChanged} />
         <div id="tabs">
@@ -142,7 +156,7 @@ class App extends Component {
             <TargetImage targetImage={this.state.targetData} onTargetImageChanged={this.targetImageChanged}/>
           </div>
           <div id="mosaicPreview" className={this.state.currentTab === 'tab-preview' ? 'shownTab' : 'hiddenTab'}>
-            <MosaicPreview width={800} height={600} previewData={this.state.previewData}/>
+            <MosaicPreview width={800} height={600} previewData={this.state.previewData} previewTimestamp={this.state.previewTimestamp} />
           </div>
           <div id="mosaicLowres" className={this.state.currentTab === 'tab-lowres' ? 'shownTab' : 'hiddenTab'}>
             <MosaicLowRes imageSrc={this.state.srcMosaicLowres} />

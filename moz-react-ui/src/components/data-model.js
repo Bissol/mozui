@@ -20,6 +20,7 @@ class MosaicData {
 
     // Mosaic
     this.mosaic = undefined
+    this.mustReindex = false
 
     // Parameters
     const numColRow_DEFAULT = 50
@@ -32,6 +33,7 @@ class MosaicData {
  
   setTarget(imgData, callback, callbackProgress) {
     this.target = new Target(imgData, callback, this.parameters.numColRow, callbackProgress)
+    this.mustReindex = true
   }
 
   initializeCollections() {
@@ -50,6 +52,8 @@ class MosaicData {
 
   // Toggle selection + loads collection from server if necessary
   selectCollection(collectionMetadata) {
+    this.mustReindex = true
+
   	return new Promise( (resolve, reject) => {
   		if (collectionMetadata.checked)
   		{
@@ -106,6 +110,7 @@ class MosaicData {
         this.mosaic.allowTileFlip = this.parameters.allowTileFlip
   	  	this.mosaic.computeFastIndex().then( () => {
           this.mosaic.ready = true
+          this.mustReindex = false
           resolve()
         console.log('Mosaic initialized')
         })

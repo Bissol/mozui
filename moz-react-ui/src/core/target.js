@@ -26,9 +26,14 @@ class Target {
       this.canvas.width = this.width
       this.canvas.height = this.height
       this.context.drawImage(this.imageElement, 0, 0)
-      this.setNumColRow(this.numColRow)
-      //this.colorData = targetFcts.extractColorInfo(this.imageElement, this.numCol, this.numRow, this.tileSize, this.matchSize, this.pixSampling)
-      //this.extractColorInfo()
+      this.changeNumColRow(this.numColRow, progressCallback).then( () => callback())
+    }
+    this.imageElement.src = imageSrcData
+  }
+  
+  changeNumColRow(ncr, progressCallback) {
+    return new Promise( (resolve, reject) => {
+      this.setNumColRow(ncr)
       let pixels = this.context.getImageData(0, 0, this.imageElement.width, this.imageElement.height)
       let worker = new ExtractTargetColorsWorker()
       worker.postMessage({cmd: 'start', pixels : pixels, width: this.width, height: this.height, numCol : this.numCol, numRow : this.numRow, tileSize : this.tileSize, matchSize : this.matchSize, pixSampling : this.pixSampling})
@@ -39,22 +44,17 @@ class Target {
         else if (event.data.type === 'result') {
           this.colorData = event.data.data
           this.ready = true
-          callback()
+          resolve()
         }
       })
-
-      //this.ready = true
-      //callback()
-    }
-    this.imageElement.src = imageSrcData
-  }
-  
-  changeNumColRow(ncr) {
-    this.setNumColRow(ncr)
-    return new Promise( (resolve, reject) => {
-      this.extractColorInfo()
-      resolve()
     })
+
+
+    // this.setNumColRow(ncr)
+    // return new Promise( (resolve, reject) => {
+    //   this.extractColorInfo()
+    //   resolve()
+    // })
   }
 
   setNumColRow(ncr)
