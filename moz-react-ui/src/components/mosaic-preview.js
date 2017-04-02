@@ -26,9 +26,13 @@ class MosaicPreview extends PureComponent {
 
       for (var i=0; i<numCol; i++) {
         for (var j=0; j<numRow; j++) {
-          let tile = tileArray[i + numCol*j].d
-          let flipped = tileArray[i + numCol*j].f
-          this.displayInCanvas(tile, context, i, j, tileSize)
+          const index = i + numCol*j
+          let elem = tileArray[index]
+          if (elem) {
+            let tile = elem.d
+            let flipped = elem.f
+            this.displayInCanvas(tile, context, i, j, tileSize)
+          }
         }
       }
 

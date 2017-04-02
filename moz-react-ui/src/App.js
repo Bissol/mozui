@@ -89,7 +89,7 @@ class App extends Component {
       }
     }
     else if (changedParam === 'allowTileFlip') {
-      //this.makeMosaic(true)
+      this.data.mustReindex = true
     }
   }
 
