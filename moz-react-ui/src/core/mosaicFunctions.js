@@ -22,11 +22,11 @@ function serverRender(mozData)
   XHR.send(encodeURIComponent(JSON.stringify(mozData)))
 }
   
-function computeFastIndex()
-{
-  let seeds = findSeeds()
-  distributeCollectionsItems(seeds)
-}
+// function computeFastIndex()
+// {
+//   let seeds = findSeeds()
+//   distributeCollectionsItems(seeds)
+// }
 
 function flipTile(tile) {
   let flipped = JSON.parse(JSON.stringify(tile))
@@ -41,7 +41,7 @@ function flipTile(tile) {
 }
   
 // Returns an array of array where collection items are reorganized according to seed similarity
-function distributeCollectionsItems(seeds, collections, allowTileFlip)
+function distributeCollectionsItems(seeds, collections, allowTileFlip, distanceParam)
 {
   if (seeds.length <= 0) {
     console.error('No seeds, aborting')
@@ -56,7 +56,7 @@ function distributeCollectionsItems(seeds, collections, allowTileFlip)
   })
   
   let func = (item, collec, flipped) => {
-    let idx = assignTileToSeed(item, seeds)
+    let idx = assignTileToSeed(item, seeds, distanceParam)
     indexedCollections[idx].push({c:collec.name, d:item, f:flipped})
     tot++
   }
@@ -79,24 +79,24 @@ function distributeCollectionsItems(seeds, collections, allowTileFlip)
 
 
 // Returns an array where tiles are reorganized according to seed similarity
-function distributeTargetTiles(seeds, tiles) {
+function distributeTargetTiles(seeds, tiles, distanceParam) {
   let result = new Array(seeds.length)
   seeds.forEach( (s,i) => {
      result[i] = []
    })
 
   tiles.forEach( (t, ti) => {
-    result[assignTileToSeed(t, seeds)].push({tile: t, index: ti})
+    result[assignTileToSeed(t, seeds, distanceParam)].push({tile: t, index: ti})
   })
 
   return result
 }
 
 // input: {tile: colorinfo, index : idx} Result : {tile:, index:, match: indexedCollItem}
-function solveTiles(tilesWithIndex, indexedCollection, progressCallback) {
+function solveTiles(tilesWithIndex, indexedCollection, distanceParam, progressCallback) {
   const tot = tilesWithIndex.length
   tilesWithIndex.forEach( (t, ti) => {
-    let best = findBestMatch(t.tile, indexedCollection)
+    let best = findBestMatch(t.tile, indexedCollection, distanceParam)
     tilesWithIndex[ti].match = best
     if (ti % 10 === 0) progressCallback( (ti / tot) * 100 )
   })
@@ -109,12 +109,12 @@ function findSeeds(clusterer)
   return clusterer.getClusterCenters()
 }
   
-function assignTileToSeed(t, seeds)
+function assignTileToSeed(t, seeds, distanceParam)
 {
   let minDist = -1
   let seedi = -1
   seeds.forEach( (s,i) => {
-    let d = distance(t,s)
+    let d = distance(t,s, distanceParam)
     if (minDist === -1 || d  < minDist) {
       minDist = d
       seedi = i
@@ -124,12 +124,12 @@ function assignTileToSeed(t, seeds)
   return seedi
 }
   
-function findBestMatch(t, tiles)
+function findBestMatch(t, tiles, distanceParam)
 {
   let minDist = Infinity
   let best = undefined
   tiles.forEach( (tt,tti) => {
-    let d = distance(t,tt.d)
+    let d = distance(t,tt.d, distanceParam)
     if (d  < minDist) {
       minDist = d
       best = tiles[tti]
@@ -138,4 +138,4 @@ function findBestMatch(t, tiles)
   return best
 }
   
-export {serverRender, computeFastIndex, distributeCollectionsItems, distributeTargetTiles, findSeeds, assignTileToSeed, findBestMatch, solveTiles, flipTile}
+export {serverRender, distributeCollectionsItems, distributeTargetTiles, findSeeds, assignTileToSeed, findBestMatch, solveTiles, flipTile}

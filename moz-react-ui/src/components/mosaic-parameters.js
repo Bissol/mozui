@@ -2,6 +2,7 @@ import React, { PureComponent } from 'react';
 import './mosaic-parameters.css';
 import ParamMosaicSize from './param-mosaic-size.js';
 import ParamAllowTileFlip from './param-allow-tile-flip.js';
+import ParamDistance from './param-distance.js';
 
 class MosaicParameters extends PureComponent {
 
@@ -10,6 +11,7 @@ class MosaicParameters extends PureComponent {
 
     this.mosaicSizeChanged = this.mosaicSizeChanged.bind(this)
     this.allowTileFlip = this.allowTileFlip.bind(this)
+    this.distanceChanged = this.distanceChanged.bind(this)
     
     const mode_DEFAULT = 'simple'
     this.state = 
@@ -43,6 +45,14 @@ class MosaicParameters extends PureComponent {
     this.props.onParametersChanged(this.state.parameters, 'allowTileFlip')
   }
 
+  distanceChanged(val) {
+    let tmpState = this.state.parameters
+    tmpState.distance = val
+    this.setState({parameters: tmpState})
+    localStorage.setItem('distance', val)
+    this.props.onParametersChanged(this.state.parameters, 'distance')
+  }
+
   // =================================================================== ACTIONS ============================================================
 
   buildMosaic() {
@@ -59,6 +69,7 @@ class MosaicParameters extends PureComponent {
         <span>Mode simple</span><input type="checkbox" defaultChecked={this.state.mode === 'simple'} onChange={() => this.toggleMode()}/>
         <ParamMosaicSize mode={this.state.mode} value={parseInt(this.state.parameters.numColRow, 10)} onMosaicSizeChanged={this.mosaicSizeChanged}/>
         <ParamAllowTileFlip mode={this.state.mode} value={this.state.parameters.allowTileFlip} onAllowTileFlip={this.allowTileFlip} />
+        <ParamDistance mode={this.state.mode} value={this.state.parameters.distance } onDistanceChanged={this.distanceChanged}/>
         <div className='actions'>
           <button onClick={() => this.buildMosaic()}>Créer ma mosaïque</button>
         </div>

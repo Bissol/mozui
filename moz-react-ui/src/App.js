@@ -91,6 +91,9 @@ class App extends Component {
     else if (changedParam === 'allowTileFlip') {
       this.data.mustReindex = true
     }
+    else if (changedParam === 'distance') {
+      this.data.mustReindex = true
+    }
   }
 
   makeMosaic() {

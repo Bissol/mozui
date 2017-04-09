@@ -7,7 +7,7 @@ self.addEventListener('message', function(e) {
 
   switch (data.cmd) {
     case 'start':
-      let res = mosaicFcts.distributeTargetTiles(data.seeds, data.tiles)
+      let res = mosaicFcts.distributeTargetTiles(data.seeds, data.tiles, data.distanceParam)
       self.postMessage({indexedTiles : res})
       break;
     

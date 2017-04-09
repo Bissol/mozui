@@ -12,10 +12,10 @@ class Cluster {
     this.initializeRand()
   }
   
-  getClusterCenters()
+  getClusterCenters(distanceParam)
   {
     for (var nbiter=0; nbiter<10; nbiter++) {
-      this.voteForClusters()
+      this.voteForClusters(distanceParam)
       this.votes.reduce((iMin, x, i, arr) => x < arr[iMin] ? i : iMin, 0)
       this.votes.reduce((iMax, x, i, arr) => x > arr[iMax] ? i : iMax, 0)
     }
@@ -36,11 +36,11 @@ class Cluster {
     }
   }
   
-  voteForClusters()
+  voteForClusters(distanceParam)
   {
     this.votes.fill(0)
     this.tiles.forEach( (t,ti) => {
-      let cluster_i = this.assignTileToCluster(t)
+      let cluster_i = this.assignTileToCluster(t, distanceParam)
       merge(this.tmpClusters[cluster_i], this.votes[cluster_i], t, 1, this.tmpClusters[cluster_i])
       this.votes[cluster_i]++
     })
@@ -49,12 +49,12 @@ class Cluster {
     })
   }
   
-  assignTileToCluster(t)
+  assignTileToCluster(t, distanceParam)
   {
     let minDist = Infinity
     let clus_i = -1
     this.clusterCenters.forEach( (clus,i) => {
-      let d = distance(t, clus)
+      let d = distance(t, clus, distanceParam)
       if (d  < minDist) {
         minDist = d
         clus_i = i

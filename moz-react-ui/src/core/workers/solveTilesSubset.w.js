@@ -12,7 +12,7 @@ self.addEventListener('message', function(e) {
 
   switch (data.cmd) {
     case 'start':
-      let res = mosaicFcts.solveTiles(data.tilesWithIndex, data.indexedCollection, progressCallback)
+      let res = mosaicFcts.solveTiles(data.tilesWithIndex, data.indexedCollection, data.distanceParam, progressCallback)
       self.postMessage({type: 'result', solvedSubset : res})
       break;
     

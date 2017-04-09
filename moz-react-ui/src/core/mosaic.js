@@ -11,8 +11,9 @@ class Mosaic {
     this.collections = collections
     this.target = target
     this.workers = []
-    this.nbSeeds = 10
+    this.nbSeeds = 12
     this.allowTileFlip = false
+    this.distanceParam = 0
     this.seeds = []
     this.indexedCollections = []
     this.clusterer = new Cluster(this.target.colorData, this.nbSeeds)
@@ -25,7 +26,7 @@ class Mosaic {
   indexCollectionsWithWorkers() {
     return new Promise( (resolve, reject) => {
       let worker = new CollectionsIndexingWorker()
-      worker.postMessage({cmd: 'start', seeds: this.seeds, collections: this.collections, allowTileFlip : this.allowTileFlip})
+      worker.postMessage({cmd: 'start', seeds: this.seeds, collections: this.collections, allowTileFlip : this.allowTileFlip, distanceParam: this.distanceParam})
       worker.addEventListener("message", (event) => {
         if (!event.data) reject('indexCollectionsWithWorkers: no data')
         this.indexedCollections = event.data.data
@@ -38,7 +39,7 @@ class Mosaic {
   indexTilesWithWorkers() {
     return new Promise( (resolve, reject) => {
       let worker = new TargetTilesIndexingWorker()
-      worker.postMessage({cmd: 'start', seeds: this.seeds, tiles: this.target.colorData})
+      worker.postMessage({cmd: 'start', seeds: this.seeds, tiles: this.target.colorData, distanceParam: this.distanceParam})
       worker.addEventListener("message", (event) => {
         if (!event.data) reject('indexTilesWithWorkers: no data')
         resolve(event.data.indexedTiles)
@@ -51,7 +52,7 @@ class Mosaic {
     return new Promise( (resolve, reject) => {
       console.log('Launching solver worker')
       let worker = new SubSolverWorker()
-      worker.postMessage({cmd: 'start', worker_id: worker_id, tilesWithIndex: subset, indexedCollection: indexedCollection})
+      worker.postMessage({cmd: 'start', worker_id: worker_id, tilesWithIndex: subset, indexedCollection: indexedCollection, distanceParam: this.distanceParam})
       worker.addEventListener("message", (event) => {
         if (event.data.type === 'result') {
           console.log('Worker done')
@@ -180,7 +181,7 @@ class Mosaic {
         console.log('Color data not present in target. Getting it now.')
       }
     
-    this.seeds = this.clusterer.getClusterCenters()
+    this.seeds = this.clusterer.getClusterCenters(this.distanceParam)
   }
 }
 

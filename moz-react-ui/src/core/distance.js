@@ -1,5 +1,5 @@
 
-function distance(t1, t2)
+function distance(t1, t2, distanceParam)
 {
   // {nbsub:this.matchSize*this.matchSize, avg: avgrgb, colors: colors}
   if (!t1 || !t2) { debugger}
@@ -9,13 +9,21 @@ function distance(t1, t2)
   }
   
   let res = 0
-  for(var i=0; i<t1.nbsub; i++)
+  for(let i=0; i<t1.nbsub; i++)
     {
-      // Color + intensity
-      const dR = Math.abs(t1.colors[i].r - t2.colors[i].r)
-      const dG = Math.abs(t1.colors[i].g - t2.colors[i].g)
-      const dB = Math.abs(t1.colors[i].b - t2.colors[i].b)
-      res += dR + dG + dB
+      let hsv1 = RGBtoHSV(t1.colors[i])
+      let hsv2 = RGBtoHSV(t2.colors[i])
+      const dH = Math.abs(hsv1.h - hsv2.h)
+      const dS = Math.abs(hsv1.s - hsv2.s)
+      const dV = Math.abs(hsv1.v - hsv2.v)
+
+      res += distanceParam * (dH + dS) +  (100 - distanceParam) * dV 
+debugger;
+      // // Color + intensity
+      // const dR = Math.abs(t1.colors[i].r - t2.colors[i].r)
+      // const dG = Math.abs(t1.colors[i].g - t2.colors[i].g)
+      // const dB = Math.abs(t1.colors[i].b - t2.colors[i].b)
+      // res += dR + dG + dB
       
       // Pure intensity
       /*const dI = Math.abs(intensity(t1.colors[i]) - intensity(t2.colors[i]))
@@ -62,6 +70,30 @@ function merge(t1, w1, t2, w2, res)
       res.colors[i].g = intens
       res.colors[i].b = intens*/
     }
+}
+
+function RGBtoHSV(r, g, b) {
+    if (arguments.length === 1) {
+        g = r.g, b = r.b, r = r.r;
+    }
+    var max = Math.max(r, g, b), min = Math.min(r, g, b),
+        d = max - min,
+        h,
+        s = (max === 0 ? 0 : d / max),
+        v = max / 255;
+
+    switch (max) {
+        case min: h = 0; break;
+        case r: h = (g - b) + d * (g < b ? 6: 0); h /= 6 * d; break;
+        case g: h = (b - r) + d * 2; h /= 6 * d; break;
+        case b: h = (r - g) + d * 4; h /= 6 * d; break;
+    }
+
+    return {
+        h: h,
+        s: s,
+        v: v
+    };
 }
 
 export {distance, merge}

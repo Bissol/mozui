@@ -25,9 +25,11 @@ class MosaicData {
     // Parameters
     const numColRow_DEFAULT = 50
     const allowTileFlip_DEFAULT = true
+    const distance_DEFAULT = 50
     this.parameters = { 
           numColRow : (localStorage.getItem('numColRow') ? localStorage.getItem('numColRow') : numColRow_DEFAULT),
-          allowTileFlip : (localStorage.getItem('allowTileFlip') ? localStorage.getItem('allowTileFlip') : allowTileFlip_DEFAULT)
+          allowTileFlip : (localStorage.getItem('allowTileFlip') ? localStorage.getItem('allowTileFlip') : allowTileFlip_DEFAULT),
+          distance : (localStorage.getItem('distance') ? localStorage.getItem('distance') : distance_DEFAULT)
         }
   }
  
@@ -108,6 +110,7 @@ class MosaicData {
     	if (selectionOfCollections && Object.keys(selectionOfCollections).length > 0 && this.target) {
   	  	this.mosaic = new Mosaic(selectionOfCollections, this.target)
         this.mosaic.allowTileFlip = this.parameters.allowTileFlip
+        this.mosaic.distanceParam = this.parameters.distance
   	  	this.mosaic.computeFastIndex().then( () => {
           this.mosaic.ready = true
           this.mustReindex = false
