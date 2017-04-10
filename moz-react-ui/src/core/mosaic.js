@@ -11,7 +11,7 @@ class Mosaic {
     this.collections = collections
     this.target = target
     this.workers = []
-    this.nbSeeds = 12
+    this.nbSeeds = 8
     this.allowTileFlip = false
     this.distanceParam = 0
     this.seeds = []
