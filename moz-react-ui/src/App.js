@@ -19,7 +19,7 @@ class App extends Component {
       collectionMetadata : this.data.collectionsMetadata,
        targetData : this.data.target,
        previewData : undefined,
-       currentTab: 'tab-target',
+       currentTab: 'tab-collec',
        busy: false,
        currentTask: "",
        progressPercent: 0,
@@ -170,9 +170,11 @@ class App extends Component {
           serverRenderNeeded = {this.state.serverRenderNeeded} 
           mosaicPreviewNeeded =  {this.state.mosaicPreviewNeeded}
         />
-        <CollectionPicker collections={this.state.collectionMetadata} onCollectionSelected={this.collectionChecked} />
         <TabSwitch selectedTab={this.state.currentTab} onTabChanged={this.tabChanged} />
         <div id="tabs">
+          <div id="selectCollections" className={this.state.currentTab === 'tab-collec' ? 'shownTab' : 'hiddenTab'}>
+            <CollectionPicker collections={this.state.collectionMetadata} onCollectionSelected={this.collectionChecked} />
+          </div>
           <div id="targetImage" className={this.state.currentTab === 'tab-target' ? 'shownTab' : 'hiddenTab'}>
             <TargetImage targetImage={this.state.targetData} onTargetImageChanged={this.targetImageChanged}/>
           </div>
