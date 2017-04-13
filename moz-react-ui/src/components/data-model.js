@@ -102,6 +102,11 @@ class MosaicData {
   	return selectedCollections
   }
 
+  isReadyForMakingPreview() {
+    let selectionOfCollections = this.getSelectedCollections()
+    return selectionOfCollections && Object.keys(selectionOfCollections).length > 0 && this.target
+  }
+
   // Initializes a new mosaic using current parameters
   initMosaic() {
   	return new Promise( (resolve, reject) => {

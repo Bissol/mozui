@@ -24,7 +24,9 @@ class App extends Component {
        currentTask: "",
        progressPercent: 0,
        hidePercent : false,
-       srcMosaicLowres : null
+       srcMosaicLowres : null,
+       mosaicPreviewNeeded : false,
+       serverRenderNeeded : false
      }
 
     this.collectionChecked = this.collectionChecked.bind(this)
@@ -32,6 +34,7 @@ class App extends Component {
     this.parametersChanged = this.parametersChanged.bind(this)
     this.tabChanged = this.tabChanged.bind(this)
     this.makeMosaic = this.makeMosaic.bind(this)
+    this.renderMosaic = this.renderMosaic.bind(this)
   }
 
   componentDidMount() {
@@ -45,7 +48,7 @@ class App extends Component {
   collectionChecked(collectionMetadata) {
     this.setState({hidePercent: true, busy : true, currentTask : "Chargement de la collection " + collectionMetadata.name_fr})
     this.data.selectCollection(collectionMetadata).then( (collection) => {
-      this.setState({collectionMetadata: this.data.collectionsMetadata})
+      this.setState({collectionMetadata: this.data.collectionsMetadata, mosaicPreviewNeeded: this.data.isReadyForMakingPreview()})
       this.setState({busy : false})
       //this.makeMosaic(true)
     })
@@ -57,7 +60,7 @@ class App extends Component {
     this.setState({progressPercent : 0, hidePercent: false, busy : true, currentTask : "Traitement de l'image"})
 
     let done = () => {
-      this.setState({targetData : this.data.target})
+      this.setState({targetData : this.data.target, mosaicPreviewNeeded: this.data.isReadyForMakingPreview()})
       this.setState({busy : false})
       //this.makeMosaic(true)
     }
@@ -75,6 +78,8 @@ class App extends Component {
     console.log('[App] Parameters changed:')
     console.log(params)
     this.data.parameters = params
+
+    this.setState({mosaicPreviewNeeded: this.data.isReadyForMakingPreview()})
 
     let callbackProgress = (percent) => {
       this.setState({progressPercent : percent})
@@ -110,8 +115,14 @@ class App extends Component {
     else {
       this.makeMosaicPromise()
     }
+  }
 
-    
+  renderMosaic() {
+    console.log('Server render launched')
+    this.setState({hidePercent: true, busy : true, currentTask : "Création de la mosaïque"})
+    this.data.renderLowResMosaic().then( (src) => {
+      this.setState({srcMosaicLowres : src, busy : false, serverRenderNeeded: false})
+    })
   }
 
   makeMosaicPromise() {
@@ -120,13 +131,13 @@ class App extends Component {
       this.setState({progressPercent : percent})
     }
 
-    this.setState({progressPercent : 0, hidePercent: false, busy : true, currentTask : "Création de la mosaïque"})
+    this.setState({progressPercent : 0, hidePercent: false, busy : true, currentTask : "Génération de l'aperçu"})
 
     this.data.computeMosaic(progressCallback).then( 
       (compTime) => {
         this.setState({busy : false})
         console.log('Mosaic successfully generated')
-        this.setState({ previewData : this.data.mosaic.result, previewTimestamp: Date.now() })
+        this.setState({ previewData : this.data.mosaic.result, previewTimestamp: Date.now(), serverRenderNeeded: true })
       }, 
       (err) => {
         console.error('Error while generating mosaic: ' + err)
@@ -138,12 +149,12 @@ class App extends Component {
     this.setState({ currentTab: tid})
 
     // If user selects mosaic tab, generate it!
-    if (tid ==='tab-lowres') {
-      console.log('Server render launched')
-      this.data.renderLowResMosaic().then( (src) => {
-        this.setState({srcMosaicLowres : src})
-      })
-    }
+    // if (tid ==='tab-lowres') {
+    //   console.log('Server render launched')
+    //   this.data.renderLowResMosaic().then( (src) => {
+    //     this.setState({srcMosaicLowres : src})
+    //   })
+    // }
   }
 
   render() {
@@ -151,7 +162,14 @@ class App extends Component {
     return (
       <div className="App" id="appMainContainer">
         <Progress hidePercent={this.state.hidePercent} busy={this.state.busy} message={this.state.currentTask} percent={this.state.progressPercent} />
-        <MosaicParameters initialParameters={this.data.parameters} onParametersChanged={this.parametersChanged} onBuildMosaic={this.makeMosaic} />
+        <MosaicParameters 
+          initialParameters={this.data.parameters} 
+          onParametersChanged={this.parametersChanged} 
+          onBuildMosaic={this.makeMosaic} 
+          onRenderMosaic={this.renderMosaic} 
+          serverRenderNeeded = {this.state.serverRenderNeeded} 
+          mosaicPreviewNeeded =  {this.state.mosaicPreviewNeeded}
+        />
         <CollectionPicker collections={this.state.collectionMetadata} onCollectionSelected={this.collectionChecked} />
         <TabSwitch selectedTab={this.state.currentTab} onTabChanged={this.tabChanged} />
         <div id="tabs">

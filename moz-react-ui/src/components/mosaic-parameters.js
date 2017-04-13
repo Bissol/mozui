@@ -56,8 +56,11 @@ class MosaicParameters extends PureComponent {
   // =================================================================== ACTIONS ============================================================
 
   buildMosaic() {
-    console.log('click')
     this.props.onBuildMosaic()
+  }
+
+  renderMosaic() {
+    this.props.onRenderMosaic()
   }
 
   // =================================================================== RENDERING ============================================================
@@ -71,7 +74,8 @@ class MosaicParameters extends PureComponent {
         <ParamAllowTileFlip mode={this.state.mode} value={this.state.parameters.allowTileFlip} onAllowTileFlip={this.allowTileFlip} />
         <ParamDistance mode={this.state.mode} value={this.state.parameters.distance } onDistanceChanged={this.distanceChanged}/>
         <div className='actions'>
-          <button onClick={() => this.buildMosaic()}>Créer ma mosaïque</button>
+          <button onClick={() => this.buildMosaic()} disabled={!this.props.mosaicPreviewNeeded} >Générer l'aperçu</button>
+          <button onClick={() => this.renderMosaic() } disabled={!this.props.serverRenderNeeded} >Créer ma mosaïque</button>
         </div>
       </div>
     );
