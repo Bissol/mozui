@@ -1,4 +1,5 @@
-import React, { Component } from 'react';
+import React, { Component } from 'react'
+import Measure from 'react-measure'
 import MosaicData from './components/data-model'
 import CollectionPicker from './components/collection-picker'
 import TargetImage from './components/target-image'
@@ -26,7 +27,8 @@ class App extends Component {
        hidePercent : false,
        srcMosaicLowres : null,
        mosaicPreviewNeeded : false,
-       serverRenderNeeded : false
+       serverRenderNeeded : false,
+       tabViewDimensions: {width: -1,height: -1}
      }
 
     this.collectionChecked = this.collectionChecked.bind(this)
@@ -171,20 +173,26 @@ class App extends Component {
           mosaicPreviewNeeded =  {this.state.mosaicPreviewNeeded}
         />
         <TabSwitch selectedTab={this.state.currentTab} onTabChanged={this.tabChanged} />
-        <div id="tabs">
-          <div id="selectCollections" className={this.state.currentTab === 'tab-collec' ? 'shownTab' : 'hiddenTab'}>
-            <CollectionPicker collections={this.state.collectionMetadata} onCollectionSelected={this.collectionChecked} />
+        <Measure onMeasure={(dimensions) => {
+          this.setState({tabViewDimensions : {width:dimensions.width, height:dimensions.height}})
+          console.log(this.state.tabViewDimensions.height)
+           }
+        }>
+          <div id="tabs">
+            <div id="selectCollections" className={this.state.currentTab === 'tab-collec' ? 'shownTab' : 'hiddenTab'}>
+              <CollectionPicker collections={this.state.collectionMetadata} onCollectionSelected={this.collectionChecked} />
+            </div>
+            <div id="targetImage" className={this.state.currentTab === 'tab-target' ? 'shownTab' : 'hiddenTab'}>
+              <TargetImage targetImage={this.state.targetData} onTargetImageChanged={this.targetImageChanged}/>
+            </div>
+            <div id="mosaicPreview" className={this.state.currentTab === 'tab-preview' ? 'shownTab' : 'hiddenTab'}>
+              <MosaicPreview width={this.state.tabViewDimensions.width} height={this.state.tabViewDimensions.height} previewData={this.state.previewData} previewTimestamp={this.state.previewTimestamp} />
+            </div>
+            <div id="mosaicLowres" className={this.state.currentTab === 'tab-lowres' ? 'shownTab' : 'hiddenTab'}>
+              <MosaicLowRes imageSrc={this.state.srcMosaicLowres} />
+            </div>
           </div>
-          <div id="targetImage" className={this.state.currentTab === 'tab-target' ? 'shownTab' : 'hiddenTab'}>
-            <TargetImage targetImage={this.state.targetData} onTargetImageChanged={this.targetImageChanged}/>
-          </div>
-          <div id="mosaicPreview" className={this.state.currentTab === 'tab-preview' ? 'shownTab' : 'hiddenTab'}>
-            <MosaicPreview width={800} height={600} previewData={this.state.previewData} previewTimestamp={this.state.previewTimestamp} />
-          </div>
-          <div id="mosaicLowres" className={this.state.currentTab === 'tab-lowres' ? 'shownTab' : 'hiddenTab'}>
-            <MosaicLowRes imageSrc={this.state.srcMosaicLowres} />
-          </div>
-        </div>
+        </Measure>
         
       </div>
     )

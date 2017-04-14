@@ -61,7 +61,7 @@ class MosaicPreview extends PureComponent {
   }
 
   render() {
-    console.log('Rendering mosaic preview')
+    console.log(`Rendering mosaic preview (w=${this.props.width}, h=${this.props.height})`)
     
     return (
         <canvas ref="canvas" className="MosaicPreviewCanvas" width={this.props.width} height={this.props.height}/>
