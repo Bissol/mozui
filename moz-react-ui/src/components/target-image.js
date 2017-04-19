@@ -29,8 +29,12 @@ class TargetImage extends PureComponent {
     
     return (
       <div className="TargetImageDiv">
-        <input ref="targetImageInput" type="file" accept="image/*" onChange={ () => {this.targetChanged()} } />
-        <img src={this.props.targetImage ? this.props.targetImage.imageSrcData : '/placeholder.jpg'} alt="La cible de ma mosaique !" className="TargetImage"/>
+      <img src={this.props.targetImage ? this.props.targetImage.imageSrcData : '/placeholder.jpg'} alt="La cible de ma mosaique !" className="TargetImage"/>
+        <div id="filePicker">
+          <label id="lblfile" htmlFor="filepkr">Choisissez une image</label><br/>
+          <input ref="targetImageInput" id="filepkr" type="file" accept="image/*" onChange={ () => {this.targetChanged()} } />
+        </div>
+        
       </div>
     );
   }

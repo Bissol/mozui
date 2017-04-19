@@ -3,3 +3,33 @@
 .TargetImage {
 	width: 100%;
 }
+
+.TargetImageDiv {
+  position: relative;
+}
+
+#filePicker {
+  position: absolute;
+  top: 40%;
+  left:40%;
+  z-index: 1;
+}
+
+#filepkr{
+  opacity: 0.1;
+}
+
+#lblfile {
+  cursor: pointer;
+  background-color: #FFF;
+  border: 1px solid #AAA;
+  border-radius: 6px;
+  padding: 8px;
+  margin-bottom: 5px;
+  font-weight: bold;
+  opacity: 0.2;
+}
+
+.TargetImageDiv:hover #lblfile {
+  opacity: 1;
+}
