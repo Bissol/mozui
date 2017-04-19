@@ -20,7 +20,7 @@ class App extends Component {
       collectionMetadata : this.data.collectionsMetadata,
        targetData : this.data.target,
        previewData : undefined,
-       currentTab: 'tab-collec',
+       currentTab: 'tab-target',
        busy: false,
        currentTask: "",
        progressPercent: 0,
@@ -175,15 +175,15 @@ class App extends Component {
         <TabSwitch selectedTab={this.state.currentTab} onTabChanged={this.tabChanged} />
         <Measure onMeasure={(dimensions) => {
           this.setState({tabViewDimensions : {width:dimensions.width, height:dimensions.height}})
-          console.log(this.state.tabViewDimensions.height)
+          console.log(this.state.tabViewDimensions.width)
            }
         }>
           <div id="tabs">
-            <div id="selectCollections" className={this.state.currentTab === 'tab-collec' ? 'shownTab' : 'hiddenTab'}>
-              <CollectionPicker collections={this.state.collectionMetadata} onCollectionSelected={this.collectionChecked} />
-            </div>
             <div id="targetImage" className={this.state.currentTab === 'tab-target' ? 'shownTab' : 'hiddenTab'}>
               <TargetImage targetImage={this.state.targetData} onTargetImageChanged={this.targetImageChanged}/>
+            </div>
+            <div id="selectCollections" className={this.state.currentTab === 'tab-collec' ? 'shownTab' : 'hiddenTab'}>
+              <CollectionPicker collections={this.state.collectionMetadata} onCollectionSelected={this.collectionChecked} />
             </div>
             <div id="mosaicPreview" className={this.state.currentTab === 'tab-preview' ? 'shownTab' : 'hiddenTab'}>
               <MosaicPreview width={this.state.tabViewDimensions.width} height={this.state.tabViewDimensions.height} previewData={this.state.previewData} previewTimestamp={this.state.previewTimestamp} />

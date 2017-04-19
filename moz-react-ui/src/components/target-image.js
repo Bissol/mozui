@@ -1,5 +1,6 @@
 import React, { PureComponent } from 'react';
 import './target-image.css';
+import placeholderImg from '../../public/placeholder.jpg'
 
 class TargetImage extends PureComponent {
 
@@ -29,7 +30,7 @@ class TargetImage extends PureComponent {
     
     return (
       <div className="TargetImageDiv">
-      <img src={this.props.targetImage ? this.props.targetImage.imageSrcData : '/placeholder.jpg'} alt="La cible de ma mosaique !" className="TargetImage"/>
+      <img src={this.props.targetImage ? this.props.targetImage.imageSrcData : placeholderImg} alt="La cible de ma mosaique !" className="TargetImage"/>
         <div id="filePicker">
           <label id="lblfile" htmlFor="filepkr">Choisissez une image</label><br/>
           <input ref="targetImageInput" id="filepkr" type="file" accept="image/*" onChange={ () => {this.targetChanged()} } />

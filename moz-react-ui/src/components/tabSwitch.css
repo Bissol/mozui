@@ -1,7 +1,6 @@
 /*tabSwitch.css*/
 
 #TabSwitch {
-  background-color: #FDD;
   width: 100%;
   display: flex;
   flex-direction: row;
@@ -14,11 +13,16 @@
 }
 
 #TabSwitch label{
-  padding: 5px 10px;
+  border: 1px solid #555;
+  padding: 8px 5px;
   cursor: pointer;
 }
 
 input[type=radio]:checked + label {
-  background-color: #f00;
+  background-color: #99f;
   font-weight: bold;
+}
+
+.tabswitchicon {
+  width:30px;
 }

@@ -1,5 +1,6 @@
 import React, { PureComponent } from 'react';
 import './mosaic-low-res.css';
+import placeholderImg from '../../public/placeholder.jpg'
 
 class MosaicLowRes extends PureComponent {
 
@@ -8,7 +9,7 @@ class MosaicLowRes extends PureComponent {
     
     return (
       <div className="MosaicLowRes">
-        <img src={this.props.imageSrc ? this.props.imageSrc : '/placeholder.jpg'} alt="Mosaique" className="mosaicImage"/>
+        <img src={this.props.imageSrc ? this.props.imageSrc : placeholderImg} alt="Mosaique" className="mosaicImage"/>
       </div>
     );
   }

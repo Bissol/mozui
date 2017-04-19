@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 import './tabSwitch.css';
+import puzzleImg from '../../public/puzzle.png'
 
 class TabSwitch extends Component {
 
@@ -18,10 +19,10 @@ class TabSwitch extends Component {
     
     return (
       <div id='TabSwitch'>
-        <input className='state' type='radio' title='tab-collec' name='tabs-state' id='tab-collec' value='tab-collec' defaultChecked={this.props.selectedTab === 'tab-collec'} onChange={() => this.tabChanged('tab-collec')}/>
-        <label htmlFor="tab-collec">Petites images</label>
         <input className='state' type='radio' title='tab-target' name='tabs-state' id='tab-target' value='tab-target' defaultChecked={this.props.selectedTab === 'tab-target'} onChange={() => this.tabChanged('tab-target')}/>
-        <label htmlFor="tab-target">Image cible</label>
+        <label htmlFor="tab-target">Image</label>
+        <input className='state' type='radio' title='tab-collec' name='tabs-state' id='tab-collec' value='tab-collec' defaultChecked={this.props.selectedTab === 'tab-collec'} onChange={() => this.tabChanged('tab-collec')}/>
+        <label htmlFor="tab-collec"><img src={puzzleImg} alt='tuile' className='tabswitchicon' />Tuiles</label>
         <input className='state' type='radio' title='tab-preview' name='tabs-state' id='tab-preview' value='tab-preview' defaultChecked={this.props.selectedTab === 'tab-preview'} onChange={() => this.tabChanged('tab-preview')}/>
         <label htmlFor="tab-preview">Aperçu</label>
         <input className='state' type='radio' title='tab-lowres' name='tabs-state' id='tab-lowres' value='tab-lowres' defaultChecked={this.props.selectedTab === 'tab-lowres'} onChange={() => this.tabChanged('tab-lowres')}/>

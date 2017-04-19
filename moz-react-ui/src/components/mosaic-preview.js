@@ -21,8 +21,9 @@ class MosaicPreview extends PureComponent {
       let tileArray = this.props.previewData.data
       let numCol = this.props.previewData.w
       let numRow = this.props.previewData.h
-      let tileSize = numRow > numCol ? (this.props.width / numRow) : (this.props.height / numCol)
+      let tileSize = this.props.width / numCol// numRow > numCol ? (this.props.width / numRow) : (this.props.height / numCol)
       tileSize = Math.round(tileSize)
+      console.log(`Width=${this.props.width} numCol=${numCol} numRow=${numRow} tileSize=${tileSize}`)
 
       for (var i=0; i<numCol; i++) {
         for (var j=0; j<numRow; j++) {
