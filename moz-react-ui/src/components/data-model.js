@@ -4,7 +4,7 @@ require('whatwg-fetch')
 import { loadCollectionJson } from '../core/collectionLoader'
 import Target from '../core/target'
 import Mosaic from '../core/mosaic'
-
+let BinaryLoaderWorker = require("../core/workers/loadBinaries.w.js")
 
 class MosaicData {
 
@@ -53,7 +53,7 @@ class MosaicData {
   }
 
   // Toggle selection + loads collection from server if necessary
-  selectCollection(collectionMetadata) {
+  selectCollection(collectionMetadata, progressCallback) {
     this.mustReindex = true
 
   	return new Promise( (resolve, reject) => {
@@ -73,12 +73,27 @@ class MosaicData {
   		else {
   			// load & select
   			console.log(collectionMetadata)
-		  	loadCollectionJson(collectionMetadata.dir, (res) => {
-		  		console.log('Loading collection')
-		  		collectionMetadata.loaded = true
-		  		collectionMetadata.checked = true
-			  	this.collections[collectionMetadata.dir] = res
-			  	resolve(this.collections[collectionMetadata.dir])})
+
+        let worker = new BinaryLoaderWorker()
+        worker.postMessage({cmd: 'start', collectionName: collectionMetadata.dir})
+        worker.addEventListener("message", (event) => {
+          if (event.data.type === 'result') {
+            collectionMetadata.loaded = true
+            collectionMetadata.checked = true
+            this.collections[collectionMetadata.dir] = event.data.collec
+            resolve(this.collections[collectionMetadata.dir])
+          }
+          else if (event.data.type === 'progress') {
+            progressCallback(event.data.worker_id, event.data.percent)
+          }
+        })
+
+		  	// loadCollectionJson(collectionMetadata.dir, (res) => {
+		  	// 	console.log('Loading collection')
+		  	// 	collectionMetadata.loaded = true
+		  	// 	collectionMetadata.checked = true
+			  // 	this.collections[collectionMetadata.dir] = res
+			  // 	resolve(this.collections[collectionMetadata.dir])})
 		 }
 	})
   }

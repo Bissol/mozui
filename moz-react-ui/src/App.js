@@ -48,8 +48,12 @@ class App extends Component {
 
   // ================================================ CHANGING COLLECTIONS ==================================================
   collectionChecked(collectionMetadata) {
-    this.setState({hidePercent: true, busy : true, currentTask : "Chargement de la collection " + collectionMetadata.name_fr})
-    this.data.selectCollection(collectionMetadata).then( (collection) => {
+    let callbackProgress = (percent) => {
+      this.setState({progressPercent : percent})
+    }
+
+    this.setState({hidePercent: false, busy : true, currentTask : "Chargement de la collection " + collectionMetadata.name_fr})
+    this.data.selectCollection(collectionMetadata, callbackProgress).then( (collection) => {
       this.setState({collectionMetadata: this.data.collectionsMetadata, mosaicPreviewNeeded: this.data.isReadyForMakingPreview()})
       this.setState({busy : false})
       //this.makeMosaic(true)

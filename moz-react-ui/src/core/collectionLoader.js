@@ -25,6 +25,8 @@ function loadCollectionJson(collectionName, callback)
   let url = baseUrl + '/' + collectionName + '/data.bin'
   
   jBinary.load(url, typeSet_v2, (err, binary) => {
+    let t1 = performance.now()
+    console.log(`Loading binary ${collectionName} took ${t1 - t0}ms`)
     const head = binary.read('header')
     var res = {}
     res.name = collectionName
@@ -33,8 +35,9 @@ function loadCollectionJson(collectionName, callback)
       const item = binary.read('tile')
       res.data.push(item)
     }
-    let t1 = performance.now();
-    console.log("Loading collection " + collectionName + " took " + (t1 - t0) + " milliseconds.")
+    
+    let t2 = performance.now()
+    console.log(`Processing binary took ${t2 - t1}ms`)
     callback(res)
   });
 }
