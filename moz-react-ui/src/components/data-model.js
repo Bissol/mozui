@@ -84,7 +84,7 @@ class MosaicData {
             resolve(this.collections[collectionMetadata.dir])
           }
           else if (event.data.type === 'progress') {
-            progressCallback(event.data.worker_id, event.data.percent)
+            progressCallback(event.data.percent)
           }
         })
 
