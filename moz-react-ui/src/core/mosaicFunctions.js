@@ -93,11 +93,13 @@ function distributeTargetTiles(seeds, tiles, distanceParam) {
 }
 
 // input: {tile: colorinfo, index : idx} Result : {tile:, index:, match: indexedCollItem}
-function solveTiles(tilesWithIndex, indexedCollection, distanceParam, progressCallback) {
+function solveTiles(tilesWithIndex, indexedCollection, distanceParam, numCol, progressCallback) {
+  let usedTiles = []
   const tot = tilesWithIndex.length
   tilesWithIndex.forEach( (t, ti) => {
-    let best = findBestMatch(t.tile, indexedCollection, distanceParam)
-    tilesWithIndex[ti].match = best
+    let best = findBestMatch(t.tile, indexedCollection, distanceParam, numCol, usedTiles, t.index)
+    t.match = best
+    usedTiles[t.index] = best.d.name
     if (ti % 10 === 0) progressCallback( (ti / tot) * 100 )
   })
 
@@ -111,11 +113,11 @@ function findSeeds(clusterer)
   
 function assignTileToSeed(t, seeds, distanceParam)
 {
-  let minDist = -1
+  let minDist = Infinity
   let seedi = -1
   seeds.forEach( (s,i) => {
     let d = distance(t,s, distanceParam)
-    if (minDist === -1 || d  < minDist) {
+    if (d  < minDist) {
       minDist = d
       seedi = i
     }
@@ -124,15 +126,28 @@ function assignTileToSeed(t, seeds, distanceParam)
   return seedi
 }
   
-function findBestMatch(t, tiles, distanceParam)
+function sameTileAround(usedTiles, index, numCol, tile)
+{
+  // if (!tile.d) return false
+  // if (!tile.d.name) return false
+
+  let i = index % numCol
+  let j = Math.floor(index / numCol)
+  console.log(usedTiles)
+  if (i != 0 && usedTiles[index - 1] == tile.d.name) return true
+
+  return false
+}
+
+function findBestMatch(t, tiles, distanceParam, numCol, usedTiles, index)
 {
   let minDist = Infinity
   let best = undefined
   tiles.forEach( (tt,tti) => {
     let d = distance(t,tt.d, distanceParam)
-    if (d  < minDist) {
+    if (d  < minDist) {//} && !sameTileAround(usedTiles, index, numCol, tt)) {
       minDist = d
-      best = tiles[tti]
+      best = tt
     }
   })
   return best

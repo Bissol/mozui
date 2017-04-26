@@ -52,7 +52,15 @@ class Mosaic {
     return new Promise( (resolve, reject) => {
       console.log('Launching solver worker')
       let worker = new SubSolverWorker()
-      worker.postMessage({cmd: 'start', worker_id: worker_id, tilesWithIndex: subset, indexedCollection: indexedCollection, distanceParam: this.distanceParam})
+      worker.postMessage(
+        {
+          cmd: 'start', 
+          worker_id: worker_id,
+          tilesWithIndex: subset,
+          indexedCollection: indexedCollection,
+          distanceParam: this.distanceParam,
+          numCol: this.target.numCol
+        })
       worker.addEventListener("message", (event) => {
         if (event.data.type === 'result') {
           console.log('Worker done')
