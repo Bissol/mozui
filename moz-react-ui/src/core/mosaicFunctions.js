@@ -94,12 +94,19 @@ function distributeTargetTiles(seeds, tiles, distanceParam) {
 
 // input: {tile: colorinfo, index : idx} Result : {tile:, index:, match: indexedCollItem}
 function solveTiles(tilesWithIndex, indexedCollection, distanceParam, numCol, progressCallback) {
-  let usedTiles = []
+  let penalties = []
   const tot = tilesWithIndex.length
   tilesWithIndex.forEach( (t, ti) => {
-    let best = findBestMatch(t.tile, indexedCollection, distanceParam, numCol, usedTiles, t.index)
+    let best = findBestMatch(t.tile, indexedCollection, distanceParam, numCol, penalties, t.index)
+    if (!best) console.error('dafuk')
     t.match = best
-    usedTiles[t.index] = best.d.name
+    let tileshort = best.d.name.toString().slice(0, -1)
+    if (penalties[tileshort]) {
+      penalties[tileshort] += 1
+    } else {
+      penalties[tileshort] = 1
+    }
+
     if (ti % 10 === 0) progressCallback( (ti / tot) * 100 )
   })
 
@@ -125,31 +132,27 @@ function assignTileToSeed(t, seeds, distanceParam)
   
   return seedi
 }
-  
-function sameTileAround(usedTiles, index, numCol, tile)
-{
-  // if (!tile.d) return false
-  // if (!tile.d.name) return false
 
-  let i = index % numCol
-  let j = Math.floor(index / numCol)
-  console.log(usedTiles)
-  if (i != 0 && usedTiles[index - 1] == tile.d.name) return true
-
-  return false
-}
-
-function findBestMatch(t, tiles, distanceParam, numCol, usedTiles, index)
+function findBestMatch(t, tiles, distanceParam, numCol, penalties, index)
 {
   let minDist = Infinity
-  let best = undefined
+  let best = tiles[0]
   tiles.forEach( (tt,tti) => {
     let d = distance(t,tt.d, distanceParam)
-    if (d  < minDist) {//} && !sameTileAround(usedTiles, index, numCol, tt)) {
+    let tileshort = tt.d.name.toString().slice(0, -1)
+    let penalty = (penalties[tileshort] ? penalties[tileshort] : 0) * 0.1 * d
+    if (penalty && !isNaN(penalty)) {
+      d += penalty
+      //console.log(`Distance ${d} with penalty ${penalty}`)
+    }
+    
+    if (d  < minDist) {
       minDist = d
       best = tt
+      if (!tt) console.error('WHAT??')
     }
   })
+
   return best
 }
   
