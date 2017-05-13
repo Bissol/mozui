@@ -19,11 +19,12 @@ let jBinary = require('jbinary')
 let baseUrl = "http://debarena.com/moz/data/tiles"
 
 
-function loadCollectionJson(collectionName, callback)
+function loadCollectionJson(collectionName, callback, progressCallback)
 {
   let t0 = performance.now()
   let url = baseUrl + '/' + collectionName + '/data.bin'
-  
+  progressCallback(0)
+
   jBinary.load(url, typeSet_v2, (err, binary) => {
     let t1 = performance.now()
     console.log(`Loading binary ${collectionName} took ${t1 - t0}ms`)
@@ -32,6 +33,9 @@ function loadCollectionJson(collectionName, callback)
     res.name = collectionName
     res.data = []
     for (var r=0; r<head.count;r++) {
+      if (r%100 === 0) {
+        progressCallback(Math.round(r / head.count * 100))
+      }
       const item = binary.read('tile')
       res.data.push(item)
     }
