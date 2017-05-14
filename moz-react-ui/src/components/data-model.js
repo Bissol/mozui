@@ -1,7 +1,6 @@
 // Data model for the app component
 // Responsible for server communication
 require('whatwg-fetch')
-import { loadCollectionJson } from '../core/collectionLoader'
 import Target from '../core/target'
 import Mosaic from '../core/mosaic'
 let BinaryLoaderWorker = require("../core/workers/loadBinaries.w.js")
@@ -72,7 +71,7 @@ class MosaicData {
   		}
   		else {
   			// load & select
-  			console.log(collectionMetadata)
+  			//console.log(collectionMetadata)
 
         let worker = new BinaryLoaderWorker()
         worker.postMessage({cmd: 'start', collectionName: collectionMetadata.dir})

@@ -77,6 +77,24 @@ function distributeCollectionsItems(seeds, collections, allowTileFlip, distanceP
   return indexedCollections
 }
 
+// Adds a few tiles to empty or almost empty clusters
+function fillShallowClusters(clusters, collections) {
+  const minTilesThreshold = 100
+  const tilesToAdd = 100
+  clusters.forEach( (cluster, idx) => {
+    if (cluster.length < minTilesThreshold) {
+      console.log(`Cluster ${idx} too shallow (size=${cluster.length}), adding ${tilesToAdd} tiles.`)
+      for (let i = 0; i< tilesToAdd; i++) {
+        let keys = Object.keys(collections)
+        let collec = collections[keys[ keys.length * Math.random() << 0]]
+        const rand_t = Math.floor(Math.random() * collec.data.length)
+        clusters[idx].push({c:collec.name, d:collec.data[rand_t], f:false})
+      }
+    }
+  })
+
+  return clusters
+}
 
 // Returns an array where tiles are reorganized according to seed similarity
 function distributeTargetTiles(seeds, tiles, distanceParam) {
@@ -156,4 +174,4 @@ function findBestMatch(t, tiles, distanceParam, numCol, penalties, index)
   return best
 }
   
-export {serverRender, distributeCollectionsItems, distributeTargetTiles, findSeeds, assignTileToSeed, findBestMatch, solveTiles, flipTile}
+export {serverRender, distributeCollectionsItems, distributeTargetTiles, findSeeds, assignTileToSeed, findBestMatch, solveTiles, flipTile, fillShallowClusters}

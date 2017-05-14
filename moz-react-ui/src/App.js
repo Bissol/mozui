@@ -173,8 +173,8 @@ class App extends Component {
           onParametersChanged={this.parametersChanged} 
           onBuildMosaic={this.makeMosaic} 
           onRenderMosaic={this.renderMosaic} 
-          serverRenderNeeded = {this.state.serverRenderNeeded} 
-          mosaicPreviewNeeded =  {this.state.mosaicPreviewNeeded}
+          serverRenderNeeded={this.state.serverRenderNeeded} 
+          mosaicPreviewNeeded={this.state.mosaicPreviewNeeded}
         />
         <TabSwitch selectedTab={this.state.currentTab} onTabChanged={this.tabChanged} />
         <Measure onMeasure={(dimensions) => {

@@ -8,6 +8,7 @@ self.addEventListener('message', function(e) {
   switch (data.cmd) {
     case 'start':
       let res = mosaicFcts.distributeCollectionsItems(data.seeds, data.collections, data.allowTileFlip, data.distanceParam)
+      res = mosaicFcts.fillShallowClusters(res, data.collections)
       self.postMessage({data : res})
       break;
     
