@@ -25,10 +25,12 @@ class MosaicData {
     const numColRow_DEFAULT = 50
     const allowTileFlip_DEFAULT = true
     const distance_DEFAULT = 50
+    const repetition_DEFAULT = 30
     this.parameters = { 
           numColRow : (localStorage.getItem('numColRow') ? localStorage.getItem('numColRow') : numColRow_DEFAULT),
           allowTileFlip : (localStorage.getItem('allowTileFlip') ? localStorage.getItem('allowTileFlip') : allowTileFlip_DEFAULT),
-          distance : (localStorage.getItem('distance') ? localStorage.getItem('distance') : distance_DEFAULT)
+          distance : (localStorage.getItem('distance') ? localStorage.getItem('distance') : distance_DEFAULT),
+          repetition : (localStorage.getItem('repetition') ? localStorage.getItem('repetition') : repetition_DEFAULT)
         }
   }
  
@@ -130,6 +132,7 @@ class MosaicData {
   	  	this.mosaic = new Mosaic(selectionOfCollections, this.target)
         this.mosaic.allowTileFlip = this.parameters.allowTileFlip
         this.mosaic.distanceParam = this.parameters.distance
+        this.mosaic.repetitionParam = this.parameters.repetition
   	  	this.mosaic.computeFastIndex().then( () => {
           this.mosaic.ready = true
           this.mustReindex = false

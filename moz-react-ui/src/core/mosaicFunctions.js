@@ -111,11 +111,11 @@ function distributeTargetTiles(seeds, tiles, distanceParam) {
 }
 
 // input: {tile: colorinfo, index : idx} Result : {tile:, index:, match: indexedCollItem}
-function solveTiles(tilesWithIndex, indexedCollection, distanceParam, numCol, progressCallback) {
+function solveTiles(tilesWithIndex, indexedCollection, distanceParam, repetitionParam, numCol, progressCallback) {
   let penalties = []
   const tot = tilesWithIndex.length
   tilesWithIndex.forEach( (t, ti) => {
-    let best = findBestMatch(t.tile, indexedCollection, distanceParam, numCol, penalties, t.index)
+    let best = findBestMatch(t.tile, indexedCollection, distanceParam, numCol, penalties, repetitionParam, t.index)
     if (!best) console.error('dafuk')
     t.match = best
     let tileshort = best.d.name.toString().slice(0, -1)
@@ -151,14 +151,14 @@ function assignTileToSeed(t, seeds, distanceParam)
   return seedi
 }
 
-function findBestMatch(t, tiles, distanceParam, numCol, penalties, index)
+function findBestMatch(t, tiles, distanceParam, numCol, penalties, repetitionParam, index)
 {
   let minDist = Infinity
   let best = tiles[0]
   tiles.forEach( (tt,tti) => {
     let d = distance(t,tt.d, distanceParam)
     let tileshort = tt.d.name.toString().slice(0, -1)
-    let penalty = (penalties[tileshort] ? penalties[tileshort] : 0) * 0.1 * d
+    let penalty = (penalties[tileshort] ? penalties[tileshort] : 0) * (repetitionParam / 100) * d
     if (penalty && !isNaN(penalty)) {
       d += penalty
       //console.log(`Distance ${d} with penalty ${penalty}`)

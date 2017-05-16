@@ -14,6 +14,7 @@ class Mosaic {
     this.nbSeeds = 8
     this.allowTileFlip = false
     this.distanceParam = 0
+    this.repetitionParam = 0
     this.seeds = []
     this.indexedCollections = []
     this.clusterer = new Cluster(this.target.colorData, this.nbSeeds)
@@ -59,6 +60,7 @@ class Mosaic {
           tilesWithIndex: subset,
           indexedCollection: indexedCollection,
           distanceParam: this.distanceParam,
+          repetitionParam: this.repetitionParam,
           numCol: this.target.numCol
         })
       worker.addEventListener("message", (event) => {

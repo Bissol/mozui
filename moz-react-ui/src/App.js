@@ -105,6 +105,9 @@ class App extends Component {
     else if (changedParam === 'distance') {
       this.data.mustReindex = true
     }
+    else if (changedParam === 'repetition') {
+      this.data.mustReindex = true
+    }
   }
 
   makeMosaic() {
