@@ -6,8 +6,8 @@ self.addEventListener('message', function(e) {
   let data = e.data
   let id = data.worker_id
 
-  let progressCallback = (percent) => {
-  	self.postMessage({type: 'progress', worker_id: id, percent : percent})
+  let progressCallback = (nbSolved) => {
+  	self.postMessage({type: 'progress', worker_id: id, nbSolved : nbSolved})
   }
 
   switch (data.cmd) {

@@ -125,7 +125,7 @@ function solveTiles(tilesWithIndex, indexedCollection, distanceParam, repetition
       penalties[tileshort] = 1
     }
 
-    if (ti % 10 === 0) progressCallback( (ti / tot) * 100 )
+    if (ti % 10 === 0) progressCallback( ti )
   })
 
   return tilesWithIndex

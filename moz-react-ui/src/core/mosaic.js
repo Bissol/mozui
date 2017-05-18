@@ -69,7 +69,7 @@ class Mosaic {
           resolve(event.data.solvedSubset)
         }
         else if (event.data.type === 'progress') {
-          progressCallback(event.data.worker_id, event.data.percent)
+          progressCallback(event.data.worker_id, event.data.nbSolved)
         }
       })
     })
@@ -81,10 +81,10 @@ class Mosaic {
     console.log('Starting mosaic (workers) with ncr=' + this.target.numColRow)
 
     let workersCompletion = new Array(this.nbSeeds)
-    let progressCallback = (worker_id, percent) => {
-      workersCompletion[worker_id] = percent
+    let progressCallback = (worker_id, nbSolved) => {
+      workersCompletion[worker_id] = nbSolved
       //console.log("Worker #" + worker_id + " is " + percent + " done")
-      let avg = Math.round(workersCompletion.reduce( (a,b) => {return a+b}) / this.nbSeeds)
+      let avg = Math.round((workersCompletion.reduce( (a,b) => {return a+b}) / (this.target.numCol*this.target.numRow)) * 100)
 
       mainProgressCallback(avg)
     }
