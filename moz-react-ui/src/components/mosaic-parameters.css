@@ -1,4 +1,5 @@
 #MosaicParametersDiv {
   background-color: #DDD;
   display: flex;
+  flex-wrap : wrap;
 }
