@@ -171,36 +171,39 @@ class App extends Component {
     return (
       <div className="App" id="appMainContainer">
         <Progress hidePercent={this.state.hidePercent} busy={this.state.busy} message={this.state.currentTask} percent={this.state.progressPercent} />
-        <MosaicParameters 
-          initialParameters={this.data.parameters} 
-          onParametersChanged={this.parametersChanged} 
-          onBuildMosaic={this.makeMosaic} 
-          onRenderMosaic={this.renderMosaic} 
-          serverRenderNeeded={this.state.serverRenderNeeded} 
-          mosaicPreviewNeeded={this.state.mosaicPreviewNeeded}
-        />
-        <TabSwitch selectedTab={this.state.currentTab} onTabChanged={this.tabChanged} />
-        <Measure onMeasure={(dimensions) => {
-          this.setState({tabViewDimensions : {width:dimensions.width, height:dimensions.height}})
-          console.log(this.state.tabViewDimensions.width)
-           }
-        }>
-          <div id="tabs">
-            <div id="targetImage" className={this.state.currentTab === 'tab-target' ? 'shownTab' : 'hiddenTab'}>
-              <TargetImage targetImage={this.state.targetData} onTargetImageChanged={this.targetImageChanged}/>
-            </div>
-            <div id="selectCollections" className={this.state.currentTab === 'tab-collec' ? 'shownTab' : 'hiddenTab'}>
-              <CollectionPicker collections={this.state.collectionMetadata} onCollectionSelected={this.collectionChecked} />
-            </div>
-            <div id="mosaicPreview" className={this.state.currentTab === 'tab-preview' ? 'shownTab' : 'hiddenTab'}>
-              <MosaicPreview width={this.state.tabViewDimensions.width} height={this.state.tabViewDimensions.height} previewData={this.state.previewData} previewTimestamp={this.state.previewTimestamp} />
-            </div>
-            <div id="mosaicLowres" className={this.state.currentTab === 'tab-lowres' ? 'shownTab' : 'hiddenTab'}>
-              <MosaicLowRes imageSrc={this.state.srcMosaicLowres} />
-            </div>
+        <div id="mozaicAppView">
+          <MosaicParameters 
+            initialParameters={this.data.parameters} 
+            onParametersChanged={this.parametersChanged} 
+            onBuildMosaic={this.makeMosaic} 
+            onRenderMosaic={this.renderMosaic} 
+            serverRenderNeeded={this.state.serverRenderNeeded} 
+            mosaicPreviewNeeded={this.state.mosaicPreviewNeeded}
+          />
+          <div id="tabView">
+            <TabSwitch selectedTab={this.state.currentTab} onTabChanged={this.tabChanged} />
+            <Measure onMeasure={(dimensions) => {
+              this.setState({tabViewDimensions : {width:dimensions.width, height:dimensions.height}})
+              console.log(this.state.tabViewDimensions.width)
+               }
+            }>
+              <div id="tabs">
+                <div id="targetImage" className={this.state.currentTab === 'tab-target' ? 'shownTab' : 'hiddenTab'}>
+                  <TargetImage targetImage={this.state.targetData} onTargetImageChanged={this.targetImageChanged}/>
+                </div>
+                <div id="selectCollections" className={this.state.currentTab === 'tab-collec' ? 'shownTab' : 'hiddenTab'}>
+                  <CollectionPicker collections={this.state.collectionMetadata} onCollectionSelected={this.collectionChecked} />
+                </div>
+                <div id="mosaicPreview" className={this.state.currentTab === 'tab-preview' ? 'shownTab' : 'hiddenTab'}>
+                  <MosaicPreview width={this.state.tabViewDimensions.width} height={this.state.tabViewDimensions.height} previewData={this.state.previewData} previewTimestamp={this.state.previewTimestamp} />
+                </div>
+                <div id="mosaicLowres" className={this.state.currentTab === 'tab-lowres' ? 'shownTab' : 'hiddenTab'}>
+                  <MosaicLowRes imageSrc={this.state.srcMosaicLowres} />
+                </div>
+              </div>
+            </Measure>
           </div>
-        </Measure>
-        
+        </div>
       </div>
     )
   }

@@ -12,17 +12,18 @@
 	top: 0px;
 	left: 0px;
 	
+  display: flex;
+  flex-direction: column;
 	align-items: center;
 	justify-content: center;
 	z-index: 99;
 	opacity: 0.8;
 	transition: 1s;
-	display: flex;
 }
 
 .progressInfo {
 	color: #DDD;
-	font-size: 2em;
+	font-size: 1.5em;
 }
 
 .percentHidden {
@@ -31,4 +32,18 @@
 
 .percentShown {
 	display: block;
+}
+
+.meter {
+  width : 100%;
+  height: 10px;
+}
+
+#squareGifWrapper {
+  width: 100%;
+}
+#squareGif {
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
 }

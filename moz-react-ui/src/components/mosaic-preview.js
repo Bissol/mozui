@@ -31,7 +31,6 @@ class MosaicPreview extends PureComponent {
           let elem = tileArray[index]
           if (elem) {
             let tile = elem.d
-            let flipped = elem.f
             this.displayInCanvas(tile, context, i, j, tileSize)
           }
         }

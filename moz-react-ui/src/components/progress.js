@@ -9,9 +9,9 @@ class Progress extends Component {
     return (
       <div className={this.props.busy ? 'busy' : 'idle'} id='Progress'>
       	<div className='progressInfo'>
-	        <img src={gifImg} />
-	        <p>{this.props.message}</p>
-	        <p className={this.props.hidePercent ? 'percentHidden' : 'percentShown'}>{this.props.percent}%</p>
+	        <div id="squareGifWrapper"><img id="squareGif" src={gifImg} alt="ça bosse !" /></div>
+	        <p>{this.props.message}{this.props.hidePercent ? '' : ` (${this.props.percent}%)`}</p>
+          <meter className="meter" min="0" low="33" high="95" max="100" value={this.props.percent} />
 	     </div>
       </div>
     );

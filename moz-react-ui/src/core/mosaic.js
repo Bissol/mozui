@@ -1,6 +1,4 @@
 import Cluster from './cluster'
-import {distance} from './distance'
-import {serverRender, computeFastIndex, distributeCollectionsItems, findSeeds, assignTileToSeed, findBestMatch} from './mosaicFunctions.js'
 let CollectionsIndexingWorker = require("./workers/indexCollectionsFromSeeds.w.js")
 let TargetTilesIndexingWorker = require("./workers/indexTilesFromSeeds.w.js")
 let SubSolverWorker = require("./workers/solveTilesSubset.w.js")
