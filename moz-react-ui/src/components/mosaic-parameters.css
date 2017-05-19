@@ -1,5 +1,6 @@
-#MosaicParametersDiv {
-  background-color: #DDD;
-  display: flex;
-  flex-wrap : wrap;
+/* see app.css */
+
+.param {
+  background: linear-gradient(#FFF, #DDD);
+  padding: 20px 2px;
 }

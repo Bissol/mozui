@@ -17,11 +17,15 @@ class ParamAllowTileFlip extends Component {
   render() {
     let Input = ''
     if (this.props.mode && this.props.mode === 'expert') {
-      Input = <span>Autoriser le retournement des images <input type='checkbox' ref='checkflip' defaultChecked={this.props.value} onChange={() => this.paramChanged()} /></span>;
+      Input = <span>Autoriser : <input type='checkbox' ref='checkflip' defaultChecked={this.props.value} onChange={() => this.paramChanged()} /></span>;
+    }
+    else {
+      Input = <p>{this.props.value ? "Autorisé" : "Pas de retournement"}</p>
     }
 
     return (
-      <div className='ParamAllowTileFlip'>
+      <div className='ParamAllowTileFlip param'>
+        <p className="paramTitle">Retournement des tuiles</p>
         {Input}
       </div>
     );

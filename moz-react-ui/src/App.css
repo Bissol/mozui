@@ -8,22 +8,29 @@ body {
 }
 
 /* Petit ecran */
+/* ---------------------------------------------------------------------- */
 @media only screen and (max-device-width : 600px) {
   #mozaicAppView {
     display: flex;
     flex-direction: column;
+
   }
 }
 
 /* Grand ecran */
+/* ---------------------------------------------------------------------- */
 @media only screen and (min-device-width : 600px) {
   #mozaicAppView {
     display: flex;
     flex-direction: row;
+
   }
 
   #MosaicParametersDiv {
     width: 30%;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
   }
 
   #tabView {
