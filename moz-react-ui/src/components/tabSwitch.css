@@ -13,14 +13,16 @@
 }
 
 #TabSwitch label{
-  border: 1px solid #555;
-  padding: 8px 5px;
+  /*border: 1px solid #888;*/
+  /*background: linear-gradient(#FFF, #EEE);*/
+  padding: 6px 5px;
   cursor: pointer;
   flex-grow: 1;
 }
 
 input[type=radio]:checked + label {
-  background-color: #ffe256;
+  /*background-color: #ffe256;*/
+  background: linear-gradient(#FFF, #ffe256);
   border: 1px solid #a8953a;
   font-weight: bold;
 }

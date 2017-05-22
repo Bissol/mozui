@@ -8,6 +8,7 @@ import MosaicPreview from './components/mosaic-preview'
 import MosaicLowRes from './components/mosaic-low-res'
 import TabSwitch from './components/tabSwitch'
 import Progress from './components/progress'
+import Header from './components/header'
 import './App.css';
 
 class App extends Component {
@@ -28,7 +29,8 @@ class App extends Component {
        srcMosaicLowres : null,
        mosaicPreviewNeeded : false,
        serverRenderNeeded : false,
-       tabViewDimensions: {width: -1,height: -1}
+       tabViewDimensions: {width: -1,height: -1},
+       mobileParametersVisible : false
      }
 
     this.collectionChecked = this.collectionChecked.bind(this)
@@ -37,6 +39,7 @@ class App extends Component {
     this.tabChanged = this.tabChanged.bind(this)
     this.makeMosaic = this.makeMosaic.bind(this)
     this.renderMosaic = this.renderMosaic.bind(this)
+    this.switchMobileParametersView = this.switchMobileParametersView.bind(this)
   }
 
   componentDidMount() {
@@ -156,14 +159,10 @@ class App extends Component {
 
   tabChanged(tid) {
     this.setState({ currentTab: tid})
+  }
 
-    // If user selects mosaic tab, generate it!
-    // if (tid ==='tab-lowres') {
-    //   console.log('Server render launched')
-    //   this.data.renderLowResMosaic().then( (src) => {
-    //     this.setState({srcMosaicLowres : src})
-    //   })
-    // }
+  switchMobileParametersView(visible) {
+    this.setState({ mobileParametersVisible: visible})
   }
 
   render() {
@@ -171,8 +170,10 @@ class App extends Component {
     return (
       <div className="App" id="appMainContainer">
         <Progress hidePercent={this.state.hidePercent} busy={this.state.busy} message={this.state.currentTask} percent={this.state.progressPercent} />
+        <Header onChangeDisplayVisibility={this.switchMobileParametersView} />
         <div id="mozaicAppView">
           <MosaicParameters 
+            mobileVisibility={this.state.mobileParametersVisible}
             initialParameters={this.data.parameters} 
             onParametersChanged={this.parametersChanged} 
             onBuildMosaic={this.makeMosaic} 
@@ -197,7 +198,7 @@ class App extends Component {
                 <div id="mosaicPreview" className={this.state.currentTab === 'tab-preview' ? 'shownTab' : 'hiddenTab'}>
                   <MosaicPreview width={this.state.tabViewDimensions.width} height={this.state.tabViewDimensions.height} previewData={this.state.previewData} previewTimestamp={this.state.previewTimestamp} />
                 </div>
-                <div id="mosaicLowres" className={this.state.currentTab === 'tab-lowres' ? 'shownTab' : 'hiddenTab'}>
+                <div id="mosaicLowres" width={this.state.tabViewDimensions.width} className={this.state.currentTab === 'tab-lowres' ? 'shownTab' : 'hiddenTab'}>
                   <MosaicLowRes imageSrc={this.state.srcMosaicLowres} />
                 </div>
               </div>

@@ -9,7 +9,7 @@ class MosaicLowRes extends PureComponent {
     
     return (
       <div className="MosaicLowRes">
-        <img src={this.props.imageSrc ? this.props.imageSrc : placeholderImg} alt="Mosaique" className="mosaicImage"/>
+        <img src={this.props.imageSrc ? this.props.imageSrc : placeholderImg} width={this.props.width} alt="Mosaique" className="mosaicImage"/>
       </div>
     );
   }

@@ -13,7 +13,19 @@ body {
   #mozaicAppView {
     display: flex;
     flex-direction: column;
+  }
 
+  .mobileShow {
+    display: block;
+    position: fixed;
+    width: 100%;
+    top: 25px;
+    left: 0px;
+    z-index: 5;
+  }
+
+  .mobileHide {
+    display: none;
   }
 }
 
@@ -35,6 +47,10 @@ body {
 
   #tabView {
     width : 70%;
+  }
+
+  #settingsVisibilitySwitch {
+    display: none;
   }
 }
 

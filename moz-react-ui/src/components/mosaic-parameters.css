@@ -2,5 +2,11 @@
 
 .param {
   background: linear-gradient(#FFF, #DDD);
-  padding: 20px 2px;
+  padding: 5px 2px;
+  font-size: 0.8em;
+  color: #333;
+}
+
+.paramTitle {
+	font-weight: bold;
 }

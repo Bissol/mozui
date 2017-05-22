@@ -78,7 +78,7 @@ class MosaicParameters extends PureComponent {
     console.log('Rendering mosaic parameters in ' + this.state.mode + ' mode')
      
     return (
-      <div id="MosaicParametersDiv">
+      <div id="MosaicParametersDiv" className={this.props.mobileVisibility ? "mobileShow" : "mobileHide"}>
         <div className="param"><span>Mode simple</span><input type="checkbox" defaultChecked={this.state.mode === 'simple'} onChange={() => this.toggleMode()}/></div>
         <ParamMosaicSize mode={this.state.mode} value={parseInt(this.state.parameters.numColRow, 10)} onMosaicSizeChanged={this.mosaicSizeChanged}/>
         <ParamAllowTileFlip mode={this.state.mode} value={this.state.parameters.allowTileFlip} onAllowTileFlip={this.allowTileFlip} />
