@@ -1,6 +1,6 @@
 import React, { Component } from 'react'
 import Measure from 'react-measure'
-import MosaicData from './components/data-model'
+import MosaicData from './core/data-model'
 import CollectionPicker from './components/collection-picker'
 import TargetImage from './components/target-image'
 import MosaicParameters from './components/mosaic-parameters'
