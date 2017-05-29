@@ -16,6 +16,7 @@ class MosaicData {
     this.collectionMetadataUrl = serverUrl + 'php/collectionsDescription.json'
     this.collectionsMetadata = undefined
     this.collections = []
+    this.collections.push({name: 'Mes images', data: []})
 
     // Mosaic
     this.mosaic = undefined
@@ -73,8 +74,6 @@ class MosaicData {
   		}
   		else {
   			// load & select
-  			//console.log(collectionMetadata)
-
         let worker = new BinaryLoaderWorker()
         worker.postMessage({cmd: 'start', collectionName: collectionMetadata.dir})
         worker.addEventListener("message", (event) => {
@@ -88,13 +87,6 @@ class MosaicData {
             progressCallback(event.data.percent)
           }
         })
-
-		  	// loadCollectionJson(collectionMetadata.dir, (res) => {
-		  	// 	console.log('Loading collection')
-		  	// 	collectionMetadata.loaded = true
-		  	// 	collectionMetadata.checked = true
-			  // 	this.collections[collectionMetadata.dir] = res
-			  // 	resolve(this.collections[collectionMetadata.dir])})
 		 }
 	})
   }
