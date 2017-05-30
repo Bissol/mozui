@@ -198,8 +198,8 @@ class App extends Component {
                 <div id="mosaicPreview" className={this.state.currentTab === 'tab-preview' ? 'shownTab' : 'hiddenTab'}>
                   <MosaicPreview width={this.state.tabViewDimensions.width} height={this.state.tabViewDimensions.height} previewData={this.state.previewData} previewTimestamp={this.state.previewTimestamp} />
                 </div>
-                <div id="mosaicLowres" width={this.state.tabViewDimensions.width} className={this.state.currentTab === 'tab-lowres' ? 'shownTab' : 'hiddenTab'}>
-                  <MosaicLowRes imageSrc={this.state.srcMosaicLowres} />
+                <div id="mosaicLowres" className={this.state.currentTab === 'tab-lowres' ? 'shownTab' : 'hiddenTab'}>
+                  <MosaicLowRes imageSrc={this.state.srcMosaicLowres} width={this.state.tabViewDimensions.width} />
                 </div>
               </div>
             </Measure>
