@@ -1,4 +1,5 @@
 import React, { Component } from 'react';
+import MyCollection from './my-collection'
 
 class CollectionPicker extends Component {
 
@@ -11,8 +12,10 @@ class CollectionPicker extends Component {
     let collectionItems = [];
     if (this.props.collections) {
       //console.log(this.props.collections)
-      collectionItems = this.props.collections.map((collection, i) =>
-      <li key={i}><span>{collection.name_fr}<input type="checkbox" checked={collection.checked} onChange={() => this.selectionChanged(collection)}/></span></li>
+      collectionItems = this.props.collections.map((collection, i) => {
+        let myColl = collection.isMyCollection ? <MyCollection></MyCollection> : collection.name_fr
+      }
+      <li key={i}><span>{myColl}<input type="checkbox" checked={collection.checked} onChange={() => this.selectionChanged(collection)}/></span></li>
       )
     }
 

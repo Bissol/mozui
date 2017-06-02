@@ -1,7 +1,7 @@
 import React, { PureComponent } from 'react';
 import './mosaic-preview.css';
 import RangeCtrl from './rangeControl'
-let ElementPan = require('react-element-pan');
+
 
 class MosaicPreview extends PureComponent {
 
@@ -96,9 +96,7 @@ class MosaicPreview extends PureComponent {
     return (
         <div>
           <RangeCtrl min={1} max={10} step={1} init={5} onNewValue={ (v) => this.setScale(v)} />
-          <ElementPan>
             <canvas ref="canvas" className="MosaicPreviewCanvas" width={this.props.width} height={this.getHeight(this.props.width)}/>
-          </ElementPan>
         </div>
     );
   }

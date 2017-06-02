@@ -2,6 +2,7 @@ import React, { PureComponent } from 'react';
 import './mosaic-low-res.css';
 import placeholderImg from '../../public/placeholder.jpg'
 import RangeCtrl from './rangeControl'
+let ElementPan = require('react-element-pan');
 
 class MosaicLowRes extends PureComponent {
 
@@ -28,7 +29,9 @@ class MosaicLowRes extends PureComponent {
       <div className="MosaicLowRes">
         {this.props.width}
         <RangeCtrl min={1} max={10} step={1} init={5} onNewValue={ (v) => this.setScale(v)} />
-        <img src={this.props.imageSrc ? this.props.imageSrc : placeholderImg} ref="hdmozimage" width={this.getWidth()} alt="Mosaique" className="mosaicImage"/>
+        <ElementPan>
+          <img src={this.props.imageSrc ? this.props.imageSrc : placeholderImg} ref="hdmozimage" width={this.getWidth()} alt="Mosaique" className="mosaicImage"/>
+        </ElementPan>
       </div>
     );
   }
