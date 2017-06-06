@@ -7,6 +7,8 @@ class MosaicPreview extends PureComponent {
 
   constructor(props) {
     super(props)
+    this.buttonPressed = this.buttonPressed.bind(this)
+
     this.state = {currentZoom : 5}
   }
 
@@ -90,12 +92,22 @@ class MosaicPreview extends PureComponent {
     })
   }
 
+  buttonPressed()
+  {
+    this.props.onRefreshButton()
+  }
+
   render() {
     console.log(`Rendering mosaic preview (w=${this.props.width}, h=${this.props.height})`)
-    
+    let refreshButton = ''
+    if (this.props.mosaicPreviewNeeded) {
+      refreshButton = <input className='centerButton' type='button' onClick={() => this.buttonPressed()} value={"Mettre à jour"} />
+    }
+
     return (
         <div>
           <RangeCtrl min={1} max={10} step={1} init={5} onNewValue={ (v) => this.setScale(v)} />
+            {refreshButton}
             <canvas ref="canvas" className="MosaicPreviewCanvas" width={this.props.width} height={this.getHeight(this.props.width)}/>
         </div>
     );

@@ -22,13 +22,22 @@ class MosaicLowRes extends PureComponent {
     return this.props.width * vtr[this.state.currentZoom]
   }
 
+  buttonPressed()
+  {
+    this.props.onRefreshButton()
+  }
+
   render() {
     console.log('Rendering mosaic (low resolution)')
-    
+    let refreshButton = ''
+    if (this.props.serverRenderNeeded) {
+      refreshButton = <input className='centerButton' type='button' onClick={() => this.buttonPressed()} value={"Mettre à jour"} />
+    }
+
     return (
       <div className="MosaicLowRes">
-        {this.props.width}
         <RangeCtrl min={1} max={10} step={1} init={5} onNewValue={ (v) => this.setScale(v)} />
+        {refreshButton}
         <ElementPan>
           <img src={this.props.imageSrc ? this.props.imageSrc : placeholderImg} ref="hdmozimage" width={this.getWidth()} alt="Mosaique" className="mosaicImage"/>
         </ElementPan>

@@ -125,7 +125,7 @@ class App extends Component {
       })
     }
     else {
-      this.makeMosaicPromise()
+      return this.makeMosaicPromise()
     }
   }
 
@@ -149,7 +149,7 @@ class App extends Component {
       (compTime) => {
         this.setState({busy : false})
         console.log('Mosaic successfully generated')
-        this.setState({ previewData : this.data.mosaic.result, previewTimestamp: Date.now(), serverRenderNeeded: true })
+        this.setState({ previewData : this.data.mosaic.result, previewTimestamp: Date.now(), mosaicPreviewNeeded: false, serverRenderNeeded: true })
       }, 
       (err) => {
         console.error('Error while generating mosaic: ' + err)
@@ -158,7 +158,14 @@ class App extends Component {
   }
 
   tabChanged(tid) {
-    this.setState({ currentTab: tid})
+    this.setState({ currentTab: tid}, () => {
+      if (this.state.currentTab === 'tab-preview' && this.state.mosaicPreviewNeeded) {
+        this.makeMosaic()
+      }
+      else if (this.state.currentTab === 'tab-lowres' && this.state.serverRenderNeeded) {
+        this.renderMosaic()
+      }
+    })
   }
 
   switchMobileParametersView(visible) {
@@ -196,10 +203,21 @@ class App extends Component {
                   <CollectionPicker collections={this.state.collectionMetadata} onCollectionSelected={this.collectionChecked} />
                 </div>
                 <div id="mosaicPreview" className={this.state.currentTab === 'tab-preview' ? 'shownTab' : 'hiddenTab'}>
-                  <MosaicPreview width={this.state.tabViewDimensions.width} height={this.state.tabViewDimensions.height} previewData={this.state.previewData} previewTimestamp={this.state.previewTimestamp} />
+                  <MosaicPreview 
+                  width={this.state.tabViewDimensions.width}
+                  height={this.state.tabViewDimensions.height}
+                  previewData={this.state.previewData}
+                  previewTimestamp={this.state.previewTimestamp}
+                  mosaicPreviewNeeded={this.state.mosaicPreviewNeeded}
+                  onRefreshButton={this.makeMosaic}
+                  />
                 </div>
                 <div id="mosaicLowres" className={this.state.currentTab === 'tab-lowres' ? 'shownTab' : 'hiddenTab'}>
-                  <MosaicLowRes imageSrc={this.state.srcMosaicLowres} width={this.state.tabViewDimensions.width} />
+                  <MosaicLowRes 
+                    imageSrc={this.state.srcMosaicLowres} 
+                    width={this.state.tabViewDimensions.width}
+                    serverRenderNeeded={this.state.serverRenderNeeded} 
+                  />
                 </div>
               </div>
             </Measure>
