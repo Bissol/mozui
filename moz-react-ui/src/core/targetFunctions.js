@@ -136,15 +136,18 @@ function extractRegion(x,y, subsize, context, pixSampling)
 // Extract a square of pixels
 function extractRegion2(x0 ,y0 , subsize, pixels, pixSampling)
 {
+  let rawSize = pixels.data.length
   let rgb = {r:0,g:0,b:0}
   let count = 0
   for (let x = x0; x < x0 + subsize; x++) {
     for (let y = y0; y < y0 + subsize; y++) {
       // OK... Try to get pixel value
-      rgb.r += pixels.data[((y * (pixels.width * 4)) + (x * 4)) + 0]
-      rgb.g += pixels.data[((y * (pixels.width * 4)) + (x * 4)) + 1]
-      rgb.b += pixels.data[((y * (pixels.width * 4)) + (x * 4)) + 2]
-      ++count
+      if (((y * (pixels.width * 4)) + (x * 4)) < rawSize) {
+        rgb.r += pixels.data[((y * (pixels.width * 4)) + (x * 4)) + 0]
+        rgb.g += pixels.data[((y * (pixels.width * 4)) + (x * 4)) + 1]
+        rgb.b += pixels.data[((y * (pixels.width * 4)) + (x * 4)) + 2]
+        ++count
+      }
     }
   }
 
@@ -152,8 +155,8 @@ function extractRegion2(x0 ,y0 , subsize, pixels, pixSampling)
   rgb.r = ~~(rgb.r/count)
   rgb.g = ~~(rgb.g/count)
   rgb.b = ~~(rgb.b/count)
-
+if (rgb.r === 0 && rgb.g === 0 && rgb.b === 0) console.error('Problem in region (' + x0 + ',' + y0 + ') of size ' + subsize)
   return rgb
 }
 
-export {extractRegion, extractTile, extractColorInfo, extractColorInfo2}
+export {extractRegion, extractTile2, extractColorInfo, extractColorInfo2}

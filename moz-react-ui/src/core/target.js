@@ -21,6 +21,7 @@ class Target {
     this.context = this.canvas.getContext('2d')
 
     this.imageElement.onload = () => {
+      console.log('img loaded')
       this.width = this.imageElement.width
       this.height = this.imageElement.height
       this.canvas.width = this.width
@@ -28,6 +29,7 @@ class Target {
       this.context.drawImage(this.imageElement, 0, 0)
       this.changeNumColRow(this.numColRow, progressCallback).then( () => callback())
     }
+    //console.log(imageSrcData)
     this.imageElement.src = imageSrcData
   }
   

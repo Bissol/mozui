@@ -40,6 +40,7 @@ class App extends Component {
     this.makeMosaic = this.makeMosaic.bind(this)
     this.renderMosaic = this.renderMosaic.bind(this)
     this.switchMobileParametersView = this.switchMobileParametersView.bind(this)
+    this.addImageToMyCollection = this.addImageToMyCollection.bind(this)
   }
 
   componentDidMount() {
@@ -61,6 +62,10 @@ class App extends Component {
       this.setState({busy : false})
       //this.makeMosaic(true)
     })
+  }
+
+  addImageToMyCollection(pixelData) {
+    this.data.addImageToMyCollection(pixelData)
   }
 
   // ================================================ CHANGING TARGET IMAGE ============================================
@@ -200,7 +205,7 @@ class App extends Component {
                   <TargetImage targetImage={this.state.targetData} onTargetImageChanged={this.targetImageChanged}/>
                 </div>
                 <div id="selectCollections" className={this.state.currentTab === 'tab-collec' ? 'shownTab' : 'hiddenTab'}>
-                  <CollectionPicker collections={this.state.collectionMetadata} onCollectionSelected={this.collectionChecked} />
+                  <CollectionPicker collections={this.state.collectionMetadata} onCollectionSelected={this.collectionChecked} addImageToMyCollection={this.addImageToMyCollection}/>
                 </div>
                 <div id="mosaicPreview" className={this.state.currentTab === 'tab-preview' ? 'shownTab' : 'hiddenTab'}>
                   <MosaicPreview 

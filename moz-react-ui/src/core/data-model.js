@@ -4,6 +4,7 @@ require('whatwg-fetch')
 import Target from '../core/target'
 import Mosaic from '../core/mosaic'
 let BinaryLoaderWorker = require("../core/workers/loadBinaries.w.js")
+let ImageToColorDataWorker = require("../core/workers/imageToColorData.w.js")
 
 class MosaicData {
 
@@ -47,7 +48,7 @@ class MosaicData {
 	  }).then( (json) => {
 	    //console.log('parsed json', json)
 	    let collections = json.collections
-	    collections = collections.map( c => {c.checked = false; c.loaded = false; return c})
+	    collections = collections.map( c => {c.checked = false; c.loaded = c.isMyCollection ? true : false; return c})
 	    return this.collectionsMetadata = collections
 	  }).catch(function(ex) {
 	    console.error('parsing failed', ex)
@@ -89,6 +90,30 @@ class MosaicData {
         })
 		 }
 	})
+  }
+
+  // Adds an image to the special myCollection
+  addImageToMyCollection(pixelData) {
+
+    // Create if necessary
+    if (!("MyCollection" in this.collections)) {
+      console.log(`Initializing myCollection`)
+      this.collections["MyCollection"] = {}
+      this.collections["MyCollection"].name = "MyCollection"
+      this.collections["MyCollection"].data = []
+    }
+
+    // Compute averages
+    let worker = new ImageToColorDataWorker()
+    worker.postMessage({cmd: 'start', pixelData: pixelData})
+    worker.addEventListener("message", (event) => {
+      if (event.data.type === 'result') {
+        let tile = event.data.data
+        tile.name = this.collections["MyCollection"].data.length.toString() + '0'
+        this.collections["MyCollection"].data.push(tile)
+        console.log("User image processed")
+      }
+    })
   }
 
   // Get an object whose properties are selected collections
