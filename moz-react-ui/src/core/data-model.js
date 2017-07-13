@@ -18,6 +18,7 @@ class MosaicData {
     this.collectionsMetadata = undefined
     this.collections = []
     this.collections.push({name: 'Mes images', data: []})
+    this.collectionCache = {}
 
     // Mosaic
     this.mosaic = undefined
@@ -146,7 +147,7 @@ class MosaicData {
     	let selectionOfCollections = this.getSelectedCollections()
 
     	if (selectionOfCollections && Object.keys(selectionOfCollections).length > 0 && this.target) {
-  	  	this.mosaic = new Mosaic(selectionOfCollections, this.target)
+  	  	this.mosaic = new Mosaic(selectionOfCollections, this.target, this.collectionCache)
         this.mosaic.allowTileFlip = this.parameters.allowTileFlip
         this.mosaic.distanceParam = this.parameters.distance
         this.mosaic.repetitionParam = this.parameters.repetition
@@ -174,16 +175,26 @@ class MosaicData {
   }
 
   // Render mosaic on server
-  renderLowResMosaic() {
+  renderLowResMosaic(localRendering, progressCallback) {
 
     return new Promise( (resolve, reject) => {
 
       if (this.mosaic.result) {
-        this.mosaic.serverRender().then( (src) => {
-          resolve(src)
-        }, () => {
-          reject("Erreur lors de la génération de la mosaïque")
-        })
+        if (localRendering) {
+          this.mosaic.clientRenderBlockMethod(progressCallback).then( (src) => {
+            resolve(src)
+          }, () => {
+            reject("Erreur lors de la génération locale de la mosaïque")
+          })
+        }
+        else {
+          this.mosaic.serverRender().then( (src) => {
+            resolve(src)
+          }, () => {
+            reject("Erreur lors de la génération de la mosaïque sur le serveur")
+          })
+        }
+        
       }
       else {
         reject("Pas de mosaïque à générer")

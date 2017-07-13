@@ -135,9 +135,15 @@ class App extends Component {
   }
 
   renderMosaic() {
+    let clientSideRendering = true
+
+    let progressCallback = (percent) => {
+      this.setState({progressPercent : percent})
+    }
+
     console.log('Server render launched')
-    this.setState({hidePercent: true, busy : true, currentTask : "Création de la mosaïque"})
-    this.data.renderLowResMosaic().then( (src) => {
+    this.setState({hidePercent: !clientSideRendering, busy : true, currentTask : "Création de votre mosaïque"})
+    this.data.renderLowResMosaic(true, progressCallback).then( (src) => {
       this.setState({srcMosaicLowres : src, busy : false, serverRenderNeeded: false})
     })
   }

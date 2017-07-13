@@ -5,7 +5,7 @@ let SubSolverWorker = require("./workers/solveTilesSubset.w.js")
 
 class Mosaic {
   
-  constructor(collections, target) {
+  constructor(collections, target, collection_cache) {
     this.collections = collections
     this.target = target
     this.workers = []
@@ -16,7 +16,11 @@ class Mosaic {
     this.seeds = []
     this.indexedCollections = []
     this.clusterer = new Cluster(this.target.colorData, this.nbSeeds)
-
+    this.localStorageCurrentKeyIndex = 0
+    this.sessionStorageCurrentKeyIndex = 0
+    this.collectionCache = collection_cache
+    this.downloadedImages = 0
+    this.gottenFromCacheImages = 0
     this.ready = false
 
     this.result = {}
@@ -147,6 +151,285 @@ class Mosaic {
   }
   
   // ***************************** MAKING THE REAL THING ***************************************
+  clientRenderBlockMethod(progressCallback) {
+    progressCallback(0)
+    let moz_i = this.result.w
+    let moz_j = this.result.h
+    let data = this.result.data
+    const tilesize = 150
+    const mozaic_width = tilesize * moz_i
+    const mozaic_height = tilesize * moz_j
+    let canvas = document.createElement("canvas")
+    canvas.width = mozaic_width
+    canvas.height = mozaic_height
+    
+    let tiles_to_process = []
+    for (let i = 0; i < moz_i; i++)
+    {
+      for (let j = 0; j < moz_j; j++)
+      {
+        let idx = j*moz_i + i
+        let tilejob = JSON.parse(JSON.stringify(data[idx]))
+        tilejob.xpos = i * tilesize
+        tilejob.ypos = j * tilesize
+        tiles_to_process.push(tilejob)
+      }
+    }
+
+    const collection_used_in_mosaic = this.getCollectionsToUse(tiles_to_process)
+
+    return new Promise( (resolve, reject) => {
+      let done = () => {
+        const quality = 0.8
+        resolve(canvas.toDataURL("image/jpeg", quality))
+      }
+      this.loadCollectionsToUse(collection_used_in_mosaic).then( () => {
+        this.processTileJobListBlockMethod(tiles_to_process, canvas, done, progressCallback)
+      })
+    })
+  }
+
+  getCollectionsToUse(tiles_to_process) {
+    let res = []
+    tiles_to_process.forEach( e => {
+      if (!res.includes(e.c)) {
+        res.push(e.c)
+      }
+    })
+
+    return res
+  }
+
+  // Put it in local cache
+  loadCollectionsToUse(collectionsToUse) {
+    return new Promise( (resolve, reject) => {
+      Promise.all(collectionsToUse.map(c => this.loadCollectionData(c))).then( values => {
+        resolve()
+      })
+    })
+  }
+
+  loadCollectionData(collection) {
+    return new Promise( (resolve, reject) => {
+      if (collection in this.collectionCache) {
+        console.log(`Collection ${collection} already in cache`)
+        resolve()
+      }
+      else {
+        // Load json mapping
+        const mapping_url = `http://debarena.com/moz/data/tiles/${collection}/mapping.json`
+        const block_url = `http://debarena.com/moz/data/tiles/${collection}/all.jpg`
+        const generate_url = `http://debarena.com/moz/php/createTiledCollection.php?collection_name=${collection}`
+
+        return fetch(mapping_url)
+        .then( (response) => {
+          return response.json()
+        }).then( (json) => {
+          // Mapping loaded
+          this.collectionCache[collection] = {}
+          this.collectionCache[collection].mapping = json
+          console.log(`Mapping for ${collection} loaded`)
+
+          // Load block
+          let img = new Image()
+          img.onload = () => {
+            this.collectionCache[collection].block = img
+            console.log(`Block for ${collection} loaded`)
+            resolve()
+          }
+          img.crossOrigin="anonymous"
+          img.src = block_url
+
+        }).catch(function(ex) {
+          console.log(`Collection ${collection} not ready on server`)
+          fetch(generate_url).then( (response) => {
+            console.log(response)
+            alert(`Erreur serveur, veuillez recharger la page et recommencer (désolé).`)
+          })
+        })
+        
+      }
+      
+    })
+  }
+
+  processTileJobListBlockMethod(tiles_to_process, canvas, done, progressCallback) {
+    console.log(`${tiles_to_process.length} tiles to process`)
+    let i = 0
+    let processTile =  () => {
+      if (i === tiles_to_process.length) {
+        done()
+      }
+      else {
+        window.requestAnimationFrame(processTile)
+        const tile = tiles_to_process[i]
+        const ccache = this.collectionCache[tile.c]
+        const img = ccache.block
+        const map = ccache.mapping
+        const sx = map[tile.d.name].i * 150
+        const sy = map[tile.d.name].j * 150
+        const dx = tile.xpos
+        const dy = tile.ypos
+        const is_flipped = tile.f
+        if (is_flipped) {
+          canvas.getContext('2d').save()
+          //canvas.getContext('2d').translate(canvas.width, 0);
+          canvas.getContext('2d').scale(-1, 1);
+        }
+        canvas.getContext('2d').drawImage(img, sx, sy, 150, 150, is_flipped ? -dx : dx, dy, is_flipped ? -150 : 150, 150)
+        if (is_flipped) {
+          canvas.getContext('2d').restore()
+        }
+        progressCallback(Math.round(100 * (i / tiles_to_process.length)))
+        i++
+      }
+    }
+
+    window.requestAnimationFrame(processTile)
+
+    // for (let i=0; i<tiles_to_process.length; i++) {
+    //   let tile = tiles_to_process[i]
+    //   let ccache = this.collectionCache[tile.c]
+    //   let img = ccache.block
+    //   let map = ccache.mapping
+    //   let sx = map[tile.d.name].i * 150
+    //   let sy = map[tile.d.name].j * 150
+    //   let dx = tile.xpos
+    //   let dy = tile.ypos
+    //   canvas.getContext('2d').drawImage(img, sx, sy, 150, 150, dx, dy, 150, 150)
+    //   progressCallback(Math.round(100 * (i / tiles_to_process.length)))
+    // }
+
+    // done()
+  }
+
+  clientRender(progressCallback) {
+    progressCallback(0)
+    this.downloadedImages = 0
+    this.gottenFromCacheImages = 0
+    let moz_i = this.result.w
+    let moz_j = this.result.h
+    let data = this.result.data
+    const tilesize = 150
+    const mozaic_width = tilesize * moz_i
+    const mozaic_height = tilesize * moz_j
+    let canvas = document.createElement("canvas")
+    canvas.width = mozaic_width
+    canvas.height = mozaic_height
+    let mini_canvas = document.createElement("canvas")
+    mini_canvas.width = 150
+    mini_canvas.height = 150
+
+    let tiles_to_process = []
+    for (let i = 0; i < moz_i; i++)
+    {
+      for (let j = 0; j < moz_j; j++)
+      {
+        let idx = j*moz_i + i
+        let tilejob = JSON.parse(JSON.stringify(data[idx]))
+        tilejob.xpos = i * tilesize
+        tilejob.ypos = j * tilesize
+        tilejob.url = `http://debarena.com/moz/data/tiles/${data[idx].c}/${data[idx].d.name}`
+        tiles_to_process.push(tilejob)
+      }
+    }
+
+    // Sort by url (so that cache is efficient)
+    function compare_by_url(a,b) {
+      if (a.url < b.url)
+        return -1
+      if (a.url > b.url)
+        return 1
+      return 0
+    }
+
+    tiles_to_process.sort(compare_by_url)
+
+    return new Promise( (resolve, reject) => {
+      let done = () => {
+        let cache_rate = Math.round(100 * (this.gottenFromCacheImages / (this.gottenFromCacheImages + this.downloadedImages)))
+        console.log(`Done rendering. ${this.gottenFromCacheImages} from cache, ${this.downloadedImages} from server (${cache_rate}%).`)
+        resolve(canvas.toDataURL("image/png"))
+      }
+      this.processTileJobList(tiles_to_process, tiles_to_process.length, canvas, mini_canvas, done, progressCallback)
+    })
+  }
+
+  processTileJobList(tileJobs, jobCount, canvas, mini_canvas, callback, progressCallback) {
+    if (tileJobs.length === 0) {
+      callback()
+    }
+    else {
+      let img = new Image()
+      img.crossOrigin="anonymous"
+      img.onload = () => {
+        this.add_cache(img, mini_canvas)
+        canvas.getContext('2d').drawImage(img, tileJobs[0].xpos, tileJobs[0].ypos)
+        tileJobs.shift()
+        progressCallback(Math.round(100 * ((jobCount - tileJobs.length) / jobCount)))
+        this.processTileJobList(tileJobs, jobCount, canvas, mini_canvas, callback, progressCallback)
+      }
+
+      img.mustCache = false
+      img.keyurl = tileJobs[0].url
+      img.src = this.try_cache(tileJobs[0].url, img)
+    }
+  }
+
+  add_cache(image, mini_canvas) {
+    if (image.mustCache) {
+      mini_canvas.getContext('2d').drawImage(image, 0, 0)
+      try {
+        localStorage.setItem(image.keyurl, mini_canvas.toDataURL("image/png"))
+      }
+      catch(err)
+      {
+        // Local storage must be full... try session storage
+        try {
+          console.log('adding to session storage')
+          sessionStorage.setItem(image.keyurl, mini_canvas.toDataURL("image/png"))
+        }
+        catch(err) {
+          // Also full... gotta delete something!
+          this.localStorageCurrentKeyIndex++
+          if (this.localStorageCurrentKeyIndex >= localStorage.length) {
+            // Switch to session storage
+            this.sessionStorageCurrentKeyIndex++
+            if (this.sessionStorageCurrentKeyIndex >= sessionStorage.length) {
+              // Time to switch back to localStorage
+              this.localStorageCurrentKeyIndex = 0
+              this.sessionStorageCurrentKeyIndex = 0
+            }
+            else {
+              let aKeyName = sessionStorage.key(this.sessionStorageCurrentKeyIndex)
+              sessionStorage.removeItem(aKeyName)
+              console.log(`Freed element ${this.sessionStorageCurrentKeyIndex} from sessionStorage (${sessionStorage.length} elements)`)
+            }
+          }
+          else {
+            let aKeyName = localStorage.key(this.localStorageCurrentKeyIndex)
+            localStorage.removeItem(aKeyName)
+            console.log(`Freed element ${this.localStorageCurrentKeyIndex} from localStorage (${localStorage.length} elements)`)
+          }
+          //this.localStorageCurrentKeyIndex = 0
+          
+        }
+      }
+    }
+  }
+
+  try_cache(url, img) {
+    if (localStorage.getItem(url) === null && sessionStorage.getItem(url) === null) {
+      img.mustCache = true
+      this.downloadedImages++
+      return url
+    }
+    else {
+      this.gottenFromCacheImages++
+      return (localStorage.getItem(url) === null ? sessionStorage.getItem(url) : localStorage.getItem(url))
+    }
+  }
+
   serverRender()
   {
     return new Promise( (resolve, reject) => {
