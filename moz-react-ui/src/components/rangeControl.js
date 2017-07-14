@@ -26,7 +26,7 @@ class rangeControl extends Component {
     return (
       <div className='rangeControl'>
         <input type='button' className='rangeButton' value='-' onClick={() => this.modifyValue(-1)} />
-        <input type='range' value={this.state.currentValue} min={this.props.min} max={this.props.max} />
+        <input type='range' defaultValue={this.state.currentValue} min={this.props.min} max={this.props.max} />
         <input type='button' className='rangeButton' value='+' onClick={() => this.modifyValue(1)} />
       </div>
     );

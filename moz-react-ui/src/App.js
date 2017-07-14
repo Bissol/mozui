@@ -52,8 +52,9 @@ class App extends Component {
 
   // ================================================ CHANGING COLLECTIONS ==================================================
   collectionChecked(collectionMetadata) {
-    let callbackProgress = (percent) => {
+    let callbackProgress = (percent, message) => {
       this.setState({progressPercent : percent})
+      if (message) this.setState({currentTask : message})
     }
 
     this.setState({hidePercent: false, busy : true, currentTask : "Chargement de la collection " + collectionMetadata.name_fr})
@@ -64,8 +65,8 @@ class App extends Component {
     })
   }
 
-  addImageToMyCollection(pixelData) {
-    this.data.addImageToMyCollection(pixelData)
+  addImageToMyCollection(pixelData, img) {
+    this.data.addImageToMyCollection(pixelData, img)
   }
 
   // ================================================ CHANGING TARGET IMAGE ============================================

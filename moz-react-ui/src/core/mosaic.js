@@ -5,8 +5,9 @@ let SubSolverWorker = require("./workers/solveTilesSubset.w.js")
 
 class Mosaic {
   
-  constructor(collections, target, collection_cache) {
+  constructor(collections, target, collection_cache, my_images) {
     this.collections = collections
+    this.myCollectionImages = my_images
     this.target = target
     this.workers = []
     this.nbSeeds = 8
@@ -181,10 +182,12 @@ class Mosaic {
     return new Promise( (resolve, reject) => {
       let done = () => {
         const quality = 0.8
-        resolve(canvas.toDataURL("image/jpeg", quality))
+        let data = canvas.toDataURL("image/jpeg", quality)
+        canvas = null
+        resolve(data)
       }
       this.loadCollectionsToUse(collection_used_in_mosaic).then( () => {
-        this.processTileJobListBlockMethod(tiles_to_process, canvas, done, progressCallback)
+        this.processTileJobListBlockMethod(tiles_to_process, this.myCollectionImages, canvas, done, progressCallback)
       })
     })
   }
@@ -211,7 +214,7 @@ class Mosaic {
 
   loadCollectionData(collection) {
     return new Promise( (resolve, reject) => {
-      if (collection in this.collectionCache) {
+      if (collection === "MyCollection" || collection in this.collectionCache) {
         console.log(`Collection ${collection} already in cache`)
         resolve()
       }
@@ -253,7 +256,7 @@ class Mosaic {
     })
   }
 
-  processTileJobListBlockMethod(tiles_to_process, canvas, done, progressCallback) {
+  processTileJobListBlockMethod(tiles_to_process, myImages, canvas, done, progressCallback) {
     console.log(`${tiles_to_process.length} tiles to process`)
     let i = 0
     let processTile =  () => {
@@ -262,24 +265,33 @@ class Mosaic {
       }
       else {
         window.requestAnimationFrame(processTile)
-        const tile = tiles_to_process[i]
-        const ccache = this.collectionCache[tile.c]
-        const img = ccache.block
-        const map = ccache.mapping
-        const sx = map[tile.d.name].i * 150
-        const sy = map[tile.d.name].j * 150
-        const dx = tile.xpos
-        const dy = tile.ypos
-        const is_flipped = tile.f
+        let tile = tiles_to_process[i]
+        const is_my = tile.c === "MyCollection"
+        let ccache = is_my ? undefined : this.collectionCache[tile.c]
+        let img = is_my ? undefined : ccache.block
+        let map = is_my ? undefined : ccache.mapping
+        let sx = is_my ? undefined : map[tile.d.name].i * 150
+        let sy = is_my ? undefined : map[tile.d.name].j * 150
+        let dx = tile.xpos
+        let dy = tile.ypos
+        let is_flipped = tile.f
+
         if (is_flipped) {
           canvas.getContext('2d').save()
-          //canvas.getContext('2d').translate(canvas.width, 0);
           canvas.getContext('2d').scale(-1, 1);
         }
-        canvas.getContext('2d').drawImage(img, sx, sy, 150, 150, is_flipped ? -dx : dx, dy, is_flipped ? -150 : 150, 150)
+
+        if (is_my) {
+          canvas.getContext('2d').drawImage(myImages[tile.d.name], is_flipped ? -dx : dx, dy, is_flipped ? -150 : 150, 150)
+        }
+        else {
+          canvas.getContext('2d').drawImage(img, sx, sy, 150, 150, is_flipped ? -dx : dx, dy, is_flipped ? -150 : 150, 150)
+        }
+        
         if (is_flipped) {
           canvas.getContext('2d').restore()
         }
+
         progressCallback(Math.round(100 * (i / tiles_to_process.length)))
         i++
       }
@@ -303,156 +315,156 @@ class Mosaic {
     // done()
   }
 
-  clientRender(progressCallback) {
-    progressCallback(0)
-    this.downloadedImages = 0
-    this.gottenFromCacheImages = 0
-    let moz_i = this.result.w
-    let moz_j = this.result.h
-    let data = this.result.data
-    const tilesize = 150
-    const mozaic_width = tilesize * moz_i
-    const mozaic_height = tilesize * moz_j
-    let canvas = document.createElement("canvas")
-    canvas.width = mozaic_width
-    canvas.height = mozaic_height
-    let mini_canvas = document.createElement("canvas")
-    mini_canvas.width = 150
-    mini_canvas.height = 150
+  // clientRender(progressCallback) {
+  //   progressCallback(0)
+  //   this.downloadedImages = 0
+  //   this.gottenFromCacheImages = 0
+  //   let moz_i = this.result.w
+  //   let moz_j = this.result.h
+  //   let data = this.result.data
+  //   const tilesize = 150
+  //   const mozaic_width = tilesize * moz_i
+  //   const mozaic_height = tilesize * moz_j
+  //   let canvas = document.createElement("canvas")
+  //   canvas.width = mozaic_width
+  //   canvas.height = mozaic_height
+  //   let mini_canvas = document.createElement("canvas")
+  //   mini_canvas.width = 150
+  //   mini_canvas.height = 150
 
-    let tiles_to_process = []
-    for (let i = 0; i < moz_i; i++)
-    {
-      for (let j = 0; j < moz_j; j++)
-      {
-        let idx = j*moz_i + i
-        let tilejob = JSON.parse(JSON.stringify(data[idx]))
-        tilejob.xpos = i * tilesize
-        tilejob.ypos = j * tilesize
-        tilejob.url = `http://debarena.com/moz/data/tiles/${data[idx].c}/${data[idx].d.name}`
-        tiles_to_process.push(tilejob)
-      }
-    }
+  //   let tiles_to_process = []
+  //   for (let i = 0; i < moz_i; i++)
+  //   {
+  //     for (let j = 0; j < moz_j; j++)
+  //     {
+  //       let idx = j*moz_i + i
+  //       let tilejob = JSON.parse(JSON.stringify(data[idx]))
+  //       tilejob.xpos = i * tilesize
+  //       tilejob.ypos = j * tilesize
+  //       tilejob.url = `http://debarena.com/moz/data/tiles/${data[idx].c}/${data[idx].d.name}`
+  //       tiles_to_process.push(tilejob)
+  //     }
+  //   }
 
-    // Sort by url (so that cache is efficient)
-    function compare_by_url(a,b) {
-      if (a.url < b.url)
-        return -1
-      if (a.url > b.url)
-        return 1
-      return 0
-    }
+  //   // Sort by url (so that cache is efficient)
+  //   function compare_by_url(a,b) {
+  //     if (a.url < b.url)
+  //       return -1
+  //     if (a.url > b.url)
+  //       return 1
+  //     return 0
+  //   }
 
-    tiles_to_process.sort(compare_by_url)
+  //   tiles_to_process.sort(compare_by_url)
 
-    return new Promise( (resolve, reject) => {
-      let done = () => {
-        let cache_rate = Math.round(100 * (this.gottenFromCacheImages / (this.gottenFromCacheImages + this.downloadedImages)))
-        console.log(`Done rendering. ${this.gottenFromCacheImages} from cache, ${this.downloadedImages} from server (${cache_rate}%).`)
-        resolve(canvas.toDataURL("image/png"))
-      }
-      this.processTileJobList(tiles_to_process, tiles_to_process.length, canvas, mini_canvas, done, progressCallback)
-    })
-  }
+  //   return new Promise( (resolve, reject) => {
+  //     let done = () => {
+  //       let cache_rate = Math.round(100 * (this.gottenFromCacheImages / (this.gottenFromCacheImages + this.downloadedImages)))
+  //       console.log(`Done rendering. ${this.gottenFromCacheImages} from cache, ${this.downloadedImages} from server (${cache_rate}%).`)
+  //       resolve(canvas.toDataURL("image/png"))
+  //     }
+  //     this.processTileJobList(tiles_to_process, tiles_to_process.length, canvas, mini_canvas, done, progressCallback)
+  //   })
+  // }
 
-  processTileJobList(tileJobs, jobCount, canvas, mini_canvas, callback, progressCallback) {
-    if (tileJobs.length === 0) {
-      callback()
-    }
-    else {
-      let img = new Image()
-      img.crossOrigin="anonymous"
-      img.onload = () => {
-        this.add_cache(img, mini_canvas)
-        canvas.getContext('2d').drawImage(img, tileJobs[0].xpos, tileJobs[0].ypos)
-        tileJobs.shift()
-        progressCallback(Math.round(100 * ((jobCount - tileJobs.length) / jobCount)))
-        this.processTileJobList(tileJobs, jobCount, canvas, mini_canvas, callback, progressCallback)
-      }
+  // processTileJobList(tileJobs, jobCount, canvas, mini_canvas, callback, progressCallback) {
+  //   if (tileJobs.length === 0) {
+  //     callback()
+  //   }
+  //   else {
+  //     let img = new Image()
+  //     img.crossOrigin="anonymous"
+  //     img.onload = () => {
+  //       this.add_cache(img, mini_canvas)
+  //       canvas.getContext('2d').drawImage(img, tileJobs[0].xpos, tileJobs[0].ypos)
+  //       tileJobs.shift()
+  //       progressCallback(Math.round(100 * ((jobCount - tileJobs.length) / jobCount)))
+  //       this.processTileJobList(tileJobs, jobCount, canvas, mini_canvas, callback, progressCallback)
+  //     }
 
-      img.mustCache = false
-      img.keyurl = tileJobs[0].url
-      img.src = this.try_cache(tileJobs[0].url, img)
-    }
-  }
+  //     img.mustCache = false
+  //     img.keyurl = tileJobs[0].url
+  //     img.src = this.try_cache(tileJobs[0].url, img)
+  //   }
+  // }
 
-  add_cache(image, mini_canvas) {
-    if (image.mustCache) {
-      mini_canvas.getContext('2d').drawImage(image, 0, 0)
-      try {
-        localStorage.setItem(image.keyurl, mini_canvas.toDataURL("image/png"))
-      }
-      catch(err)
-      {
-        // Local storage must be full... try session storage
-        try {
-          console.log('adding to session storage')
-          sessionStorage.setItem(image.keyurl, mini_canvas.toDataURL("image/png"))
-        }
-        catch(err) {
-          // Also full... gotta delete something!
-          this.localStorageCurrentKeyIndex++
-          if (this.localStorageCurrentKeyIndex >= localStorage.length) {
-            // Switch to session storage
-            this.sessionStorageCurrentKeyIndex++
-            if (this.sessionStorageCurrentKeyIndex >= sessionStorage.length) {
-              // Time to switch back to localStorage
-              this.localStorageCurrentKeyIndex = 0
-              this.sessionStorageCurrentKeyIndex = 0
-            }
-            else {
-              let aKeyName = sessionStorage.key(this.sessionStorageCurrentKeyIndex)
-              sessionStorage.removeItem(aKeyName)
-              console.log(`Freed element ${this.sessionStorageCurrentKeyIndex} from sessionStorage (${sessionStorage.length} elements)`)
-            }
-          }
-          else {
-            let aKeyName = localStorage.key(this.localStorageCurrentKeyIndex)
-            localStorage.removeItem(aKeyName)
-            console.log(`Freed element ${this.localStorageCurrentKeyIndex} from localStorage (${localStorage.length} elements)`)
-          }
-          //this.localStorageCurrentKeyIndex = 0
+  // add_cache(image, mini_canvas) {
+  //   if (image.mustCache) {
+  //     mini_canvas.getContext('2d').drawImage(image, 0, 0)
+  //     try {
+  //       localStorage.setItem(image.keyurl, mini_canvas.toDataURL("image/png"))
+  //     }
+  //     catch(err)
+  //     {
+  //       // Local storage must be full... try session storage
+  //       try {
+  //         console.log('adding to session storage')
+  //         sessionStorage.setItem(image.keyurl, mini_canvas.toDataURL("image/png"))
+  //       }
+  //       catch(err) {
+  //         // Also full... gotta delete something!
+  //         this.localStorageCurrentKeyIndex++
+  //         if (this.localStorageCurrentKeyIndex >= localStorage.length) {
+  //           // Switch to session storage
+  //           this.sessionStorageCurrentKeyIndex++
+  //           if (this.sessionStorageCurrentKeyIndex >= sessionStorage.length) {
+  //             // Time to switch back to localStorage
+  //             this.localStorageCurrentKeyIndex = 0
+  //             this.sessionStorageCurrentKeyIndex = 0
+  //           }
+  //           else {
+  //             let aKeyName = sessionStorage.key(this.sessionStorageCurrentKeyIndex)
+  //             sessionStorage.removeItem(aKeyName)
+  //             console.log(`Freed element ${this.sessionStorageCurrentKeyIndex} from sessionStorage (${sessionStorage.length} elements)`)
+  //           }
+  //         }
+  //         else {
+  //           let aKeyName = localStorage.key(this.localStorageCurrentKeyIndex)
+  //           localStorage.removeItem(aKeyName)
+  //           console.log(`Freed element ${this.localStorageCurrentKeyIndex} from localStorage (${localStorage.length} elements)`)
+  //         }
+  //         //this.localStorageCurrentKeyIndex = 0
           
-        }
-      }
-    }
-  }
+  //       }
+  //     }
+  //   }
+  // }
 
-  try_cache(url, img) {
-    if (localStorage.getItem(url) === null && sessionStorage.getItem(url) === null) {
-      img.mustCache = true
-      this.downloadedImages++
-      return url
-    }
-    else {
-      this.gottenFromCacheImages++
-      return (localStorage.getItem(url) === null ? sessionStorage.getItem(url) : localStorage.getItem(url))
-    }
-  }
+  // try_cache(url, img) {
+  //   if (localStorage.getItem(url) === null && sessionStorage.getItem(url) === null) {
+  //     img.mustCache = true
+  //     this.downloadedImages++
+  //     return url
+  //   }
+  //   else {
+  //     this.gottenFromCacheImages++
+  //     return (localStorage.getItem(url) === null ? sessionStorage.getItem(url) : localStorage.getItem(url))
+  //   }
+  // }
 
-  serverRender()
-  {
-    return new Promise( (resolve, reject) => {
-      let t0 = performance.now()
-      let baseUrl = "http://debarena.com/moz/php"
-      var XHR = new XMLHttpRequest()
-      XHR.addEventListener('load', function(event) {
-        //console.log(XHR.responseText)
-        let src = "data:image/jpeg;base64," + XHR.responseText
-        let t1 = performance.now()
-        console.log("Rendering mosaic took " + (t1 - t0) + " milliseconds.")
-        resolve(src)
-      })
+  // serverRender()
+  // {
+  //   return new Promise( (resolve, reject) => {
+  //     let t0 = performance.now()
+  //     let baseUrl = "http://debarena.com/moz/php"
+  //     var XHR = new XMLHttpRequest()
+  //     XHR.addEventListener('load', function(event) {
+  //       //console.log(XHR.responseText)
+  //       let src = "data:image/jpeg;base64," + XHR.responseText
+  //       let t1 = performance.now()
+  //       console.log("Rendering mosaic took " + (t1 - t0) + " milliseconds.")
+  //       resolve(src)
+  //     })
       
-      XHR.addEventListener('error', function(event) {
-        alert('Oups! Something goes wrong.')
-      })
+  //     XHR.addEventListener('error', function(event) {
+  //       alert('Oups! Something goes wrong.')
+  //     })
       
-      XHR.open('post', baseUrl + '/serverRender.php', true)
-      XHR.setRequestHeader("Content-type", "application/json")
-      XHR.send(encodeURIComponent(JSON.stringify(this.result)))
-    })
-  }
+  //     XHR.open('post', baseUrl + '/serverRender.php', true)
+  //     XHR.setRequestHeader("Content-type", "application/json")
+  //     XHR.send(encodeURIComponent(JSON.stringify(this.result)))
+  //   })
+  // }
   
   computeFastIndex()
   {

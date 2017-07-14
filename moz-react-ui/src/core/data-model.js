@@ -19,6 +19,7 @@ class MosaicData {
     this.collections = []
     this.collections.push({name: 'Mes images', data: []})
     this.collectionCache = {}
+    this.myCollectionImages = {}
 
     // Mosaic
     this.mosaic = undefined
@@ -68,7 +69,7 @@ class MosaicData {
   			collectionMetadata.checked = false
   			resolve(this.collections[collectionMetadata.dir])
   		}
-  		else if (collectionMetadata.loaded) {
+  		else if (collectionMetadata.loaded || collectionMetadata.dir === "MyCollection") {
   			// Already loaded
   			console.log('Selecting already loaded collection')
   			collectionMetadata.checked = true
@@ -76,6 +77,7 @@ class MosaicData {
   		}
   		else {
   			// load & select
+        this.loadCollectionData(collectionMetadata.dir)
         let worker = new BinaryLoaderWorker()
         worker.postMessage({cmd: 'start', collectionName: collectionMetadata.dir})
         worker.addEventListener("message", (event) => {
@@ -93,8 +95,52 @@ class MosaicData {
 	})
   }
 
+  // Load collection mapping and block and put it to cache
+  loadCollectionData(collection) {
+    return new Promise( (resolve, reject) => {
+      if (collection === "MyCollection" || collection in this.collectionCache) {
+        console.log(`Collection ${collection} already in cache`)
+        resolve()
+      }
+      else {
+        // Load json mapping
+        const mapping_url = `http://debarena.com/moz/data/tiles/${collection}/mapping.json`
+        const block_url = `http://debarena.com/moz/data/tiles/${collection}/all.jpg`
+        const generate_url = `http://debarena.com/moz/php/createTiledCollection.php?collection_name=${collection}`
+
+        return fetch(mapping_url)
+        .then( (response) => {
+          return response.json()
+        }).then( (json) => {
+          // Mapping loaded
+          this.collectionCache[collection] = {}
+          this.collectionCache[collection].mapping = json
+          console.log(`Mapping for ${collection} loaded`)
+
+          // Load block
+          let img = new Image()
+          img.onload = () => {
+            this.collectionCache[collection].block = img
+            console.log(`Block for ${collection} loaded`)
+            resolve()
+          }
+          img.crossOrigin="anonymous"
+          img.src = block_url
+
+        }).catch(function(ex) {
+          console.log(`Collection ${collection} not ready on server`)
+          fetch(generate_url).then( (response) => {
+            alert(`Erreur serveur, veuillez recharger la page et recommencer (désolé).`)
+          })
+        })
+        
+      }
+      
+    })
+  }
+
   // Adds an image to the special myCollection
-  addImageToMyCollection(pixelData) {
+  addImageToMyCollection(pixelData, img) {
 
     // Create if necessary
     if (!("MyCollection" in this.collections)) {
@@ -109,9 +155,13 @@ class MosaicData {
     worker.postMessage({cmd: 'start', pixelData: pixelData})
     worker.addEventListener("message", (event) => {
       if (event.data.type === 'result') {
+        // Save color infos
         let tile = event.data.data
         tile.name = this.collections["MyCollection"].data.length.toString() + '0'
         this.collections["MyCollection"].data.push(tile)
+
+        // Save image
+        this.myCollectionImages[tile.name] = img
         console.log("User image processed")
       }
     })
@@ -147,7 +197,7 @@ class MosaicData {
     	let selectionOfCollections = this.getSelectedCollections()
 
     	if (selectionOfCollections && Object.keys(selectionOfCollections).length > 0 && this.target) {
-  	  	this.mosaic = new Mosaic(selectionOfCollections, this.target, this.collectionCache)
+  	  	this.mosaic = new Mosaic(selectionOfCollections, this.target, this.collectionCache, this.myCollectionImages)
         this.mosaic.allowTileFlip = this.parameters.allowTileFlip
         this.mosaic.distanceParam = this.parameters.distance
         this.mosaic.repetitionParam = this.parameters.repetition

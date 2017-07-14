@@ -31,18 +31,6 @@ imagesAdded() {
 				})
 			})
 		}
-
-	
-	  	// for (let i=0; i<tmparr.length; i++) {
-
-	  	// }
-
-	  // 	Promise.all(tmparr.map(this.imageLoaded)).then( values => {
-	  // 		this.setState((prevState) => {
-	  // 			console.log(`${values.length} images added`)
-			//   return {loadedImages: prevState.loadedImages.concat(values) }
-			// })
-	  // 	})
 	  }
 	  else {
 	  	alert(`Navigateur non compatible (fileReader)`)
@@ -61,7 +49,7 @@ resizeInCanvas(urldata) {
     		canvas.getContext('2d').drawImage(img, 0, 0, canvas.width, canvas.height)
 
     		// Send pixel data for avg extraction
-    		this.props.addImageToMyCollection(canvas.getContext('2d').getImageData(0, 0, canvas.width, canvas.height))
+    		this.props.addImageToMyCollection(canvas.getContext('2d').getImageData(0, 0, canvas.width, canvas.height), img)
 
     		resolve(canvas.toDataURL("image/png"))
 		}
@@ -70,13 +58,6 @@ resizeInCanvas(urldata) {
 	})
 }
 
-// shrink(dataurl_array) {
-	
-
-// 	Promise.all( dataurl_array.map(durl => this.resizeInCanvas(img, canvas, durl))).then( shrunk_images => {
-		
-// 	})
-// }
 
 render() {
 	let count = 0
