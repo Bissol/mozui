@@ -1,5 +1,5 @@
 import Cluster from './cluster'
-import {distance} from './distance'
+import {distance, intensity} from './distance'
 
 
 function serverRender(mozData)
@@ -118,6 +118,8 @@ function solveTiles(tilesWithIndex, indexedCollection, distanceParam, repetition
     let best = findBestMatch(t.tile, indexedCollection, distanceParam, numCol, penalties, repetitionParam, t.index)
     if (!best) console.error('dafuk')
     t.match = best
+
+    // Apply penalty for this tile
     let tileshort = best.d.name.toString().slice(0, -1)
     if (penalties[tileshort]) {
       penalties[tileshort] += 1
@@ -166,8 +168,8 @@ function findBestMatch(t, tiles, distanceParam, numCol, penalties, repetitionPar
     
     if (d  < minDist) {
       minDist = d
+      tt.intensityCorrection = intensity(t.avg) - intensity(tt.d.avg)
       best = tt
-      if (!tt) console.error('WHAT??')
     }
   })
 

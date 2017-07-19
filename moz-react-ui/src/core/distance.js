@@ -65,4 +65,4 @@ function merge(t1, w1, t2, w2, res)
     }
 }
 
-export {distance, merge}
+export {distance, merge, intensity}

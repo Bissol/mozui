@@ -44,8 +44,7 @@ class MosaicPreview extends PureComponent {
           const index = i + numCol*j
           let elem = tileArray[index]
           if (elem) {
-            let tile = elem.d
-            this.displayInCanvas(tile, context, i, j, tileSize)
+            this.displayInCanvas(elem, context, i, j, tileSize)
           }
         }
       }
@@ -64,24 +63,36 @@ class MosaicPreview extends PureComponent {
   }
 
   // Display tile at given position in a canvas
-  displayInCanvas(tile, ctx, i, j, size, txt) {
-    if (!tile) return
+  displayInCanvas(elem, ctx, i, j, size, txt) {
+    if (!elem.d) return
 
+    // Some useful comment
     const x = Math.ceil(i * size)
     const y = Math.ceil(j * size)
-    const numColRow = Math.sqrt(tile.nbsub)
+    const numColRow = Math.sqrt(elem.d.nbsub)
     var subsize = Math.round(size / numColRow)
+
+   // Draw tile
     for (var si=0; si<numColRow; si++)
-      {
-        for (var sj=0; sj<numColRow; sj++)
-          {
-            ctx.beginPath()
-            ctx.rect(x + si*subsize, y + sj*subsize, subsize, subsize)
-            const col = tile.colors[si*numColRow + sj]
-            ctx.fillStyle = "rgba("+col.r+", "+col.g+", "+col.b+", 1)"
-            ctx.fill()
-          }
-      }
+    {
+      for (var sj=0; sj<numColRow; sj++)
+        {
+          ctx.beginPath()
+          ctx.rect(x + si*subsize, y + sj*subsize, subsize, subsize)
+          const col = elem.d.colors[si*numColRow + sj]
+          ctx.fillStyle = "rgba("+col.r+", "+col.g+", "+col.b+", 1)"
+          ctx.fill()
+        }
+    }
+
+    // Apply intensity correction
+    ctx.beginPath()
+    ctx.rect(x, y, numColRow*subsize, numColRow*subsize)
+    let icc = elem.intensityCorrection > 0 ? 255 : 0
+    let alpha = Math.abs(elem.intensityCorrection) / 255
+    console.log(`Correction: ${elem.intensityCorrection} -> Color ${icc} alpha: ${alpha}`)
+    ctx.fillStyle = `rgba(${icc}, ${icc}, ${icc}, ${alpha})`
+    ctx.fill()
   }
 
   getHeight(width) {
