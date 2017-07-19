@@ -7,6 +7,7 @@ class Target {
     this.ready = false
     this.imageSrcData = imageSrcData
     this.imageElement = new Image()
+    this.maxImgLongSide = 600
     this.width = -1
     this.height = -1
     this.defaultNumColRow = 50
@@ -17,6 +18,7 @@ class Target {
     this.pixSampling = 2
     this.matchSize = 4
     this.colorData = []
+    this.edgeImage = undefined
     this.canvas = document.createElement('canvas')
     this.context = this.canvas.getContext('2d')
 
@@ -24,9 +26,21 @@ class Target {
       console.log('img loaded')
       this.width = this.imageElement.width
       this.height = this.imageElement.height
+      if (this.width > this.maxImgLongSide || this.height > this.maxImgLongSide) {
+        if (this.width > this.height) {
+          let ratio = this.height / this.width
+          this.width = this.maxImgLongSide
+          this.height = Math.ceil(this.maxImgLongSide * ratio)
+        }
+        else {
+          let ratio = this.width / this.height
+          this.width = Math.ceil(this.maxImgLongSide * ratio)
+          this.height = this.maxImgLongSide
+        }
+      }
       this.canvas.width = this.width
       this.canvas.height = this.height
-      this.context.drawImage(this.imageElement, 0, 0)
+      this.context.drawImage(this.imageElement, 0, 0, this.width, this.height)
       this.changeNumColRow(this.numColRow, progressCallback).then( () => callback())
     }
     //console.log(imageSrcData)
@@ -45,6 +59,17 @@ class Target {
         }
         else if (event.data.type === 'result') {
           this.colorData = event.data.data
+          worker.postMessage({cmd: 'edges', pixels : pixels, width: this.width, height: this.height})
+          //this.ready = true
+          //resolve()
+        }
+        else if (event.data.type === 'edge_result') {
+          let imgData = event.data.data
+          this.context.putImageData(imgData, 0, 0)
+          let tempimg = new Image()
+          tempimg.src = this.canvas.toDataURL("image/png")
+          document.body.appendChild(tempimg)
+          this.edgeImage = tempimg
           this.ready = true
           resolve()
         }

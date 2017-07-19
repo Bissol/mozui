@@ -11,6 +11,7 @@ class Mosaic {
     this.target = target
     this.workers = []
     this.nbSeeds = 8
+    this.mosaic_tile_size = 80
     this.allowTileFlip = false
     this.distanceParam = 0
     this.repetitionParam = 0
@@ -157,9 +158,8 @@ class Mosaic {
     let moz_i = this.result.w
     let moz_j = this.result.h
     let data = this.result.data
-    const tilesize = 150
-    const mozaic_width = tilesize * moz_i
-    const mozaic_height = tilesize * moz_j
+    const mozaic_width = this.mosaic_tile_size * moz_i
+    const mozaic_height = this.mosaic_tile_size * moz_j
     let canvas = document.createElement("canvas")
     canvas.width = mozaic_width
     canvas.height = mozaic_height
@@ -171,8 +171,8 @@ class Mosaic {
       {
         let idx = j*moz_i + i
         let tilejob = JSON.parse(JSON.stringify(data[idx]))
-        tilejob.xpos = i * tilesize
-        tilejob.ypos = j * tilesize
+        tilejob.xpos = i * this.mosaic_tile_size
+        tilejob.ypos = j * this.mosaic_tile_size
         tiles_to_process.push(tilejob)
       }
     }
@@ -182,6 +182,10 @@ class Mosaic {
     return new Promise( (resolve, reject) => {
       let done = () => {
         const quality = 0.8
+        canvas.getContext('2d').save()
+        canvas.getContext('2d').globalCompositeOperation = 'luminosity'
+        canvas.getContext('2d').drawImage(this.target.edgeImage, 0, 0, mozaic_width, mozaic_height)
+        canvas.getContext('2d').restore()
         let data = canvas.toDataURL("image/jpeg", quality)
         canvas = null
         resolve(data)
@@ -213,43 +217,46 @@ class Mosaic {
   }
 
   loadCollectionData(collection) {
+
     return new Promise( (resolve, reject) => {
       if (collection === "MyCollection" || collection in this.collectionCache) {
         console.log(`Collection ${collection} already in cache`)
         resolve()
       }
       else {
-        // Load json mapping
-        const mapping_url = `http://debarena.com/moz/data/tiles/${collection}/mapping.json`
-        const block_url = `http://debarena.com/moz/data/tiles/${collection}/all.jpg`
-        const generate_url = `http://debarena.com/moz/php/createTiledCollection.php?collection_name=${collection}`
+        console.error('Should not be doing that from here...')
+        reject()
+        // // Load json mapping
+        // const mapping_url = `http://debarena.com/moz/data/tiles/${collection}/mapping_${this.mosaic_tile_size}.json`
+        // const block_url = `http://debarena.com/moz/data/tiles/${collection}/all_${this.mosaic_tile_size}.jpg`
+        // const generate_url = `http://debarena.com/moz/php/createTiledCollection.php?collection_name=${collection}&tilesize=${this.mosaic_tile_size}`
 
-        return fetch(mapping_url)
-        .then( (response) => {
-          return response.json()
-        }).then( (json) => {
-          // Mapping loaded
-          this.collectionCache[collection] = {}
-          this.collectionCache[collection].mapping = json
-          console.log(`Mapping for ${collection} loaded`)
+        // return fetch(mapping_url)
+        // .then( (response) => {
+        //   return response.json()
+        // }).then( (json) => {
+        //   // Mapping loaded
+        //   this.collectionCache[collection] = {}
+        //   this.collectionCache[collection].mapping = json
+        //   console.log(`Mapping for ${collection} loaded`)
 
-          // Load block
-          let img = new Image()
-          img.onload = () => {
-            this.collectionCache[collection].block = img
-            console.log(`Block for ${collection} loaded`)
-            resolve()
-          }
-          img.crossOrigin="anonymous"
-          img.src = block_url
+        //   // Load block
+        //   let img = new Image()
+        //   img.onload = () => {
+        //     this.collectionCache[collection].block = img
+        //     console.log(`Block for ${collection} loaded`)
+        //     resolve()
+        //   }
+        //   img.crossOrigin="anonymous"
+        //   img.src = block_url
 
-        }).catch(function(ex) {
-          console.log(`Collection ${collection} not ready on server`)
-          fetch(generate_url).then( (response) => {
-            console.log(response)
-            alert(`Erreur serveur, veuillez recharger la page et recommencer (désolé).`)
-          })
-        })
+        // }).catch(function(ex) {
+        //   console.log(`Collection ${collection} not ready on server`)
+        //   fetch(generate_url).then( (response) => {
+        //     console.log(response)
+        //     alert(`Erreur serveur, veuillez recharger la page et recommencer (désolé).`)
+        //   })
+        // })
         
       }
       
@@ -270,8 +277,9 @@ class Mosaic {
         let ccache = is_my ? undefined : this.collectionCache[tile.c]
         let img = is_my ? undefined : ccache.block
         let map = is_my ? undefined : ccache.mapping
-        let sx = is_my ? undefined : map[tile.d.name].i * 150
-        let sy = is_my ? undefined : map[tile.d.name].j * 150
+        let tilesize = map ? img.width / Math.ceil(Math.sqrt(Object.keys(map).length)): undefined
+        let sx = is_my ? undefined : map[tile.d.name].i * tilesize
+        let sy = is_my ? undefined : map[tile.d.name].j * tilesize
         let dx = tile.xpos
         let dy = tile.ypos
         let is_flipped = tile.f
@@ -282,10 +290,15 @@ class Mosaic {
         }
 
         if (is_my) {
-          canvas.getContext('2d').drawImage(myImages[tile.d.name], is_flipped ? -dx : dx, dy, is_flipped ? -150 : 150, 150)
+          canvas.getContext('2d').drawImage(myImages[tile.d.name], is_flipped ? -dx : dx, dy, is_flipped ? -this.mosaic_tile_size : this.mosaic_tile_size, this.mosaic_tile_size)
         }
         else {
-          canvas.getContext('2d').drawImage(img, sx, sy, 150, 150, is_flipped ? -dx : dx, dy, is_flipped ? -150 : 150, 150)
+          // const nb_tiles = Object.keys(map).length
+          // const border_in_tiles = Math.ceil(Math.sqrt(nb_tiles))
+          // const actual_tile_width = img.width / border_in_tiles
+          // alert(`Drawing at ${sx},${sy} from img ${img.width}X${img.height}`)
+
+          canvas.getContext('2d').drawImage(img, sx, sy, tilesize, tilesize, is_flipped ? -dx : dx, dy, is_flipped ? -this.mosaic_tile_size : this.mosaic_tile_size, this.mosaic_tile_size)
         }
         
         if (is_flipped) {

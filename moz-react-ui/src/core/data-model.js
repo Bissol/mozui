@@ -24,6 +24,7 @@ class MosaicData {
     // Mosaic
     this.mosaic = undefined
     this.mustReindex = false
+    this.mosaic_tile_size = 80
 
     // Parameters
     const numColRow_DEFAULT = 50
@@ -104,9 +105,9 @@ class MosaicData {
       }
       else {
         // Load json mapping
-        const mapping_url = `http://debarena.com/moz/data/tiles/${collection}/mapping.json`
-        const block_url = `http://debarena.com/moz/data/tiles/${collection}/all.jpg`
-        const generate_url = `http://debarena.com/moz/php/createTiledCollection.php?collection_name=${collection}`
+        const mapping_url = `http://debarena.com/moz/data/tiles/${collection}/mapping_${this.mosaic_tile_size}.json`
+        const block_url = `http://debarena.com/moz/data/tiles/${collection}/all_${this.mosaic_tile_size}.jpg`
+        const generate_url = `http://debarena.com/moz/php/createTiledCollection.php?collection_name=${collection}&tilesize=${this.mosaic_tile_size}`
 
         return fetch(mapping_url)
         .then( (response) => {

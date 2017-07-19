@@ -52,6 +52,14 @@ class MosaicPreview extends PureComponent {
 
     }
 
+    // Draw edges
+    if (this.props.edgeImage) {
+      context.save()
+      context.globalCompositeOperation = 'luminosity'
+      context.drawImage(this.props.edgeImage, 0, 0, this.refs.canvas.width, this.refs.canvas.height)
+      context.restore()
+    }
+
     context.restore()
   }
 

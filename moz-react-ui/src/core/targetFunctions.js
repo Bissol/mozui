@@ -25,6 +25,58 @@ function extractColorInfo(imageElement, numCol, numRow, tileSize, matchSize, pix
   return colorData
 }
 
+function extractEdges(pixels, width, height, progressCallback)
+{
+  // Make an empty image data
+  let raw_result = new Uint8ClampedArray(pixels.data.length)
+
+  // Iterate over image
+  for (let x=0; x<width; x++) {
+    progressCallback(Math.round(100 * (x / width)))
+    for (let y=0; y<height; y++) {
+      let roughness = getRoughnessAt(pixels, x, y, 2, width, 1)
+      let alpha = roughness * 1.5
+      raw_result[((y * (pixels.width * 4)) + (x * 4)) + 0] = pixels.data[((y * (pixels.width * 4)) + (x * 4)) + 0]
+      raw_result[((y * (pixels.width * 4)) + (x * 4)) + 1] = pixels.data[((y * (pixels.width * 4)) + (x * 4)) + 1]
+      raw_result[((y * (pixels.width * 4)) + (x * 4)) + 2] = pixels.data[((y * (pixels.width * 4)) + (x * 4)) + 2]
+      raw_result[((y * (pixels.width * 4)) + (x * 4)) + 3] = alpha
+    }
+  }
+
+  // Result image data
+  let imageData = new ImageData(raw_result, pixels.width, pixels.height)
+  return imageData
+}
+
+function getRoughnessAt(pixels, x, y, half_square, width, step) {
+  let count = 0
+  let diff = 0
+  let rgb = {r:0,g:0,b:0}
+  let rawSize = pixels.data.length
+
+  let center = {r: pixels.data[((y * (pixels.width * 4)) + (x * 4)) + 0], g: pixels.data[((y * (pixels.width * 4)) + (x * 4)) + 1], b: pixels.data[((y * (pixels.width * 4)) + (x * 4)) + 2]}
+  // let center_grey = pixels.data[((y * (pixels.width * 4)) + (x * 4)) + 0]
+  //                   + pixels.data[((y * (pixels.width * 4)) + (x * 4)) + 1]
+  //                   + pixels.data[((y * (pixels.width * 4)) + (x * 4)) + 2]
+  // center_grey = center_grey / 3
+
+  for (let i = x - half_square ; i <= x + half_square; i += step) {
+    for (let j = y - half_square ; j <= y + half_square; j += step) {
+      if (((j * (pixels.width * 4)) + (i * 4)) < rawSize) {
+        rgb.r = pixels.data[((j * (pixels.width * 4)) + (i * 4)) + 0]
+        rgb.g = pixels.data[((j * (pixels.width * 4)) + (i * 4)) + 1]
+        rgb.b = pixels.data[((j * (pixels.width * 4)) + (i * 4)) + 2]
+        //grey = grey / 3
+        diff += Math.sqrt(Math.pow(center.r - rgb.r, 2) + Math.pow(center.g - rgb.g, 2) + Math.pow(center.b - rgb.b, 2))
+        ++count
+      }
+    }
+  }
+
+  diff = diff / count
+  return diff
+}
+
 // Extract tiles from an image
 function extractColorInfo2(pixels, width, height, numCol, numRow, tileSize, matchSize, pixSampling, progressCallback)
 {
@@ -159,4 +211,4 @@ if (rgb.r === 0 && rgb.g === 0 && rgb.b === 0) console.error('Problem in region 
   return rgb
 }
 
-export {extractRegion, extractTile2, extractColorInfo, extractColorInfo2}
+export {extractRegion, extractTile2, extractColorInfo, extractColorInfo2, extractEdges}

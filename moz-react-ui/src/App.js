@@ -21,6 +21,7 @@ class App extends Component {
       collectionMetadata : this.data.collectionsMetadata,
        targetData : this.data.target,
        previewData : undefined,
+       edgeImage: undefined,
        currentTab: 'tab-target',
        busy: false,
        currentTask: "",
@@ -161,7 +162,11 @@ class App extends Component {
       (compTime) => {
         this.setState({busy : false})
         console.log('Mosaic successfully generated')
-        this.setState({ previewData : this.data.mosaic.result, previewTimestamp: Date.now(), mosaicPreviewNeeded: false, serverRenderNeeded: true })
+        this.setState({ previewData : this.data.mosaic.result,
+                        edgeImage: this.data.target.edgeImage,
+                        previewTimestamp: Date.now(),
+                        mosaicPreviewNeeded: false,
+                        serverRenderNeeded: true })
       }, 
       (err) => {
         console.error('Error while generating mosaic: ' + err)
@@ -219,6 +224,7 @@ class App extends Component {
                   width={this.state.tabViewDimensions.width}
                   height={this.state.tabViewDimensions.height}
                   previewData={this.state.previewData}
+                  edgeImage={this.state.edgeImage}
                   previewTimestamp={this.state.previewTimestamp}
                   mosaicPreviewNeeded={this.state.mosaicPreviewNeeded}
                   onRefreshButton={this.makeMosaic}
