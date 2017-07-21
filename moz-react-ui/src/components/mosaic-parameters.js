@@ -4,6 +4,8 @@ import ParamMosaicSize from './param-mosaic-size.js';
 import ParamAllowTileFlip from './param-allow-tile-flip.js';
 import ParamDistance from './param-distance.js';
 import ParamRepetition from './param-repetition.js';
+import ParamEdges from './param-edges.js';
+import ParamLuminosityCorrection from './param-luminosity-correction.js';
 
 class MosaicParameters extends PureComponent {
 
@@ -14,6 +16,9 @@ class MosaicParameters extends PureComponent {
     this.allowTileFlip = this.allowTileFlip.bind(this)
     this.distanceChanged = this.distanceChanged.bind(this)
     this.repetitionChanged = this.repetitionChanged.bind(this)
+    this.edgesFactorChanged = this.edgesFactorChanged.bind(this)
+    this.edgesMergeModeChanged = this.edgesMergeModeChanged.bind(this)
+    this.luminosityCorrectionChanged = this.luminosityCorrectionChanged.bind(this)
     
     const mode_DEFAULT = 'simple'
     this.state = 
@@ -63,6 +68,33 @@ class MosaicParameters extends PureComponent {
     this.props.onParametersChanged(this.state.parameters, 'repetition')
   }
 
+  edgesFactorChanged(val) {
+    let tmpState = this.state.parameters
+    tmpState.edgesFactor = val
+    this.setState({parameters: tmpState}, () => {
+      localStorage.setItem('edgesFactor', val)
+      this.props.onParametersChanged(this.state.parameters, 'edgesFactor')
+    })
+  }
+
+  edgesMergeModeChanged(val) {
+    let tmpState = this.state.parameters
+    tmpState.edgesMergeMode = val
+    this.setState({parameters: tmpState}, () => {
+      localStorage.setItem('edgesMergeMode', val)
+      this.props.onParametersChanged(this.state.parameters, 'edgesMergeMode')
+    })
+  }
+
+  luminosityCorrectionChanged(val) {
+    let tmpState = this.state.parameters
+    tmpState.luminosityCorrection = val
+    this.setState({parameters: tmpState}, () => {
+      localStorage.setItem('luminosityCorrection', val)
+      this.props.onParametersChanged(this.state.parameters, 'luminosityCorrection')
+    })
+  }
+
   // =================================================================== ACTIONS ============================================================
 
   buildMosaic() {
@@ -75,7 +107,7 @@ class MosaicParameters extends PureComponent {
 
   // =================================================================== RENDERING ============================================================
   render() {
-    console.log('Rendering mosaic parameters in ' + this.state.mode + ' mode')
+    //console.log('Rendering mosaic parameters in ' + this.state.mode + ' mode')
      
     return (
       <div id="MosaicParametersDiv" className={this.props.mobileVisibility ? "mobileShow" : "mobileHide"}>
@@ -84,6 +116,14 @@ class MosaicParameters extends PureComponent {
         <ParamAllowTileFlip mode={this.state.mode} value={this.state.parameters.allowTileFlip} onAllowTileFlip={this.allowTileFlip} />
         <ParamDistance mode={this.state.mode} value={this.state.parameters.distance } onDistanceChanged={this.distanceChanged}/>
         <ParamRepetition mode={this.state.mode} value={this.state.parameters.repetition } onRepetitionChanged={this.repetitionChanged}/>
+        <ParamEdges mode={this.state.mode}
+                    edgesFactor={parseInt(this.state.parameters.edgesFactor,10) }
+                    blendMode={this.state.parameters.edgesMergeMode}
+                    onEdgesMergeModeChanged={this.edgesMergeModeChanged}
+                    onEdgesFactorChanged={this.edgesFactorChanged}/>
+        <ParamLuminosityCorrection mode={this.state.mode}
+                    luminosityCorrection={parseInt(this.state.parameters.luminosityCorrection, 10) }
+                    onLuminosityCorrectionChanged={this.luminosityCorrectionChanged} />
         <div className='actions'>
           <button onClick={() => this.buildMosaic()} disabled={!this.props.mosaicPreviewNeeded} >Générer l'aperçu</button>
           <button onClick={() => this.renderMosaic() } disabled={!this.props.serverRenderNeeded} >Créer ma mosaïque</button>

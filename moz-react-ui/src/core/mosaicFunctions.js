@@ -168,6 +168,17 @@ function findBestMatch(t, tiles, distanceParam, numCol, penalties, repetitionPar
     
     if (d  < minDist) {
       minDist = d
+      let tt_intensity = intensity(tt.d.avg)
+      if (tt_intensity === 0) {
+        // Bug from binaries generator...
+        console.error(`Image ${tt.d.name} had bad intensity`)
+        let avg = tt.d.colors.reduce( (a,b) => {return {r:a.r + b.r, g:b.g + a.g, b:a.b + b.b}}, {r:0, g:0, b:0})
+        avg.r = Math.floor(avg.r / tt.d.colors.length)
+        avg.g = Math.floor(avg.g / tt.d.colors.length)
+        avg.b = Math.floor(avg.b / tt.d.colors.length)
+        tt.d.avg = avg
+        let tt_intensity = intensity(tt.d.avg)
+      }
       tt.intensityCorrection = intensity(t.avg) - intensity(tt.d.avg)
       best = tt
     }

@@ -28,7 +28,7 @@ function distance(t1, t2, distanceParam)
 
 function intensity(rgb)
 {
-  return Math.round((rgb.r + rgb.g + rgb.b) / 3)
+  return Math.round(0.2989*rgb.r + 0.5870*rgb.g + 0.1140*rgb.b)
 }
 
 function merge(t1, w1, t2, w2, res)

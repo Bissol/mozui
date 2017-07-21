@@ -24,23 +24,43 @@ class MosaicData {
     // Mosaic
     this.mosaic = undefined
     this.mustReindex = false
+    this.mustReprocessTargetImage = false
     this.mosaic_tile_size = 80
 
     // Parameters
-    const numColRow_DEFAULT = 50
-    const allowTileFlip_DEFAULT = true
-    const distance_DEFAULT = 50
-    const repetition_DEFAULT = 30
+    const parametersDefault = {
+      numColRow_DEFAULT : 50,
+      allowTileFlip_DEFAULT : true,
+      distance_DEFAULT : 50,
+      repetition_DEFAULT : 30,
+      edgesFactor_DEFAULT : 2,
+      edgesMergeMode_DEFAULT : 'luminosity',
+      luminosityCorrection_DEFAULT : 2,
+    }
+    
+    let check= (paramkey) => {
+      let v = localStorage.getItem(paramkey)
+      if (!v || v === "NaN" || v==="undefined" || v==="null" || v==="") {
+        return parametersDefault[`${paramkey}_DEFAULT`]
+      }
+      else {
+        return v
+      }
+    }
+
     this.parameters = { 
-          numColRow : (localStorage.getItem('numColRow') ? localStorage.getItem('numColRow') : numColRow_DEFAULT),
-          allowTileFlip : (localStorage.getItem('allowTileFlip') ? localStorage.getItem('allowTileFlip') : allowTileFlip_DEFAULT),
-          distance : (localStorage.getItem('distance') ? localStorage.getItem('distance') : distance_DEFAULT),
-          repetition : (localStorage.getItem('repetition') ? localStorage.getItem('repetition') : repetition_DEFAULT)
+          numColRow : check('numColRow'),
+          allowTileFlip : check('allowTileFlip'),
+          distance : check('distance'),
+          repetition : check('repetition'),
+          edgesFactor : check('edgesFactor'),
+          edgesMergeMode : check('edgesMergeMode'),
+          luminosityCorrection : check('luminosityCorrection')
         }
   }
  
   setTarget(imgData, callback, callbackProgress) {
-    this.target = new Target(imgData, callback, this.parameters.numColRow, callbackProgress)
+    this.target = new Target(imgData, callback, this.parameters.numColRow, callbackProgress, this.parameters)
     this.mustReindex = true
   }
 
@@ -199,9 +219,11 @@ class MosaicData {
 
     	if (selectionOfCollections && Object.keys(selectionOfCollections).length > 0 && this.target) {
   	  	this.mosaic = new Mosaic(selectionOfCollections, this.target, this.collectionCache, this.myCollectionImages)
-        this.mosaic.allowTileFlip = this.parameters.allowTileFlip
-        this.mosaic.distanceParam = this.parameters.distance
-        this.mosaic.repetitionParam = this.parameters.repetition
+        this.mosaic.globalParameters = this.parameters
+        // this.mosaic.allowTileFlip = this.parameters.allowTileFlip
+        // this.mosaic.distanceParam = this.parameters.distance
+        // this.mosaic.repetitionParam = this.parameters.repetition
+        // this.mosaic.edgesMergeMode = this.parameters.edgesMergeMode
   	  	this.mosaic.computeFastIndex().then( () => {
           this.mosaic.ready = true
           this.mustReindex = false

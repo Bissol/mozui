@@ -3,7 +3,7 @@ let ExtractTargetColorsWorker = require("./workers/extractTargetColors.w.js")
 
 class Target {
   
-  constructor(imageSrcData, callback, initialNumColRow, progressCallback) {
+  constructor(imageSrcData, callback, initialNumColRow, progressCallback, globalParams) {
     this.ready = false
     this.imageSrcData = imageSrcData
     this.imageElement = new Image()
@@ -18,6 +18,7 @@ class Target {
     this.pixSampling = 2
     this.matchSize = 4
     this.colorData = []
+    this.params = globalParams
     this.edgeImage = undefined
     this.canvas = document.createElement('canvas')
     this.context = this.canvas.getContext('2d')
@@ -50,7 +51,7 @@ class Target {
   changeNumColRow(ncr, progressCallback) {
     return new Promise( (resolve, reject) => {
       this.setNumColRow(ncr)
-      let pixels = this.context.getImageData(0, 0, this.imageElement.width, this.imageElement.height)
+      let pixels = this.context.getImageData(0, 0, this.width, this.height)
       let worker = new ExtractTargetColorsWorker()
       worker.postMessage({cmd: 'start', pixels : pixels, width: this.width, height: this.height, numCol : this.numCol, numRow : this.numRow, tileSize : this.tileSize, matchSize : this.matchSize, pixSampling : this.pixSampling})
       worker.addEventListener("message", (event) => {
@@ -59,15 +60,19 @@ class Target {
         }
         else if (event.data.type === 'result') {
           this.colorData = event.data.data
-          worker.postMessage({cmd: 'edges', pixels : pixels, width: this.width, height: this.height})
+          worker.postMessage({cmd: 'edges', pixels : pixels, width: this.width, height: this.height, edgesFactor: this.params.edgesFactor})
           //this.ready = true
           //resolve()
         }
         else if (event.data.type === 'edge_result') {
           let imgData = event.data.data
-          this.context.putImageData(imgData, 0, 0)
+          // Create fucking tmp canvas instead of using THIS
+          let tmpcanvas = document.createElement('canvas')
+          tmpcanvas.width = this.width
+          tmpcanvas.height = this.height
+          tmpcanvas.getContext('2d').putImageData(imgData, 0, 0)
           let tempimg = new Image()
-          tempimg.src = this.canvas.toDataURL("image/png")
+          tempimg.src = tmpcanvas.toDataURL("image/png")
           document.body.appendChild(tempimg)
           this.edgeImage = tempimg
           this.ready = true
@@ -92,7 +97,6 @@ class Target {
     const longSide = this.width > this.height ? this.width : this.height
     this.tileSize = Math.floor(longSide / this.numColRow)
     this.colorData = new Array(this.numCol * this.numRow)
-    console.log('Target numColRow changed: (' + this.numCol + ',' + this.numRow + ') w:' + this.width + '/' + (this.numCol * this.tileSize) + ' - ' +  this.height + '/' + (this.numRow * this.tileSize))
   }
   
   extractColorInfo()

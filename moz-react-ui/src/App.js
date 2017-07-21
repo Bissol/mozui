@@ -31,7 +31,9 @@ class App extends Component {
        mosaicPreviewNeeded : false,
        serverRenderNeeded : false,
        tabViewDimensions: {width: -1,height: -1},
-       mobileParametersVisible : false
+       mobileParametersVisible : false,
+       blendMode: this.data.parameters.edgesMergeMode,
+       luminosityCorrection : this.data.parameters.luminosityCorrection
      }
 
     this.collectionChecked = this.collectionChecked.bind(this)
@@ -39,9 +41,11 @@ class App extends Component {
     this.parametersChanged = this.parametersChanged.bind(this)
     this.tabChanged = this.tabChanged.bind(this)
     this.makeMosaic = this.makeMosaic.bind(this)
+    this.makePreview = this.makePreview.bind(this)
     this.renderMosaic = this.renderMosaic.bind(this)
     this.switchMobileParametersView = this.switchMobileParametersView.bind(this)
     this.addImageToMyCollection = this.addImageToMyCollection.bind(this)
+    this.callbackProgress = this.callbackProgress.bind(this)
   }
 
   componentDidMount() {
@@ -51,18 +55,17 @@ class App extends Component {
       })
   }
 
+  callbackProgress(percent, message) {
+    this.setState({progressPercent : percent})
+    if (message) this.setState({currentTask : message})
+  }
+
   // ================================================ CHANGING COLLECTIONS ==================================================
   collectionChecked(collectionMetadata) {
-    let callbackProgress = (percent, message) => {
-      this.setState({progressPercent : percent})
-      if (message) this.setState({currentTask : message})
-    }
-
     this.setState({hidePercent: false, busy : true, currentTask : "Chargement de la collection " + collectionMetadata.name_fr})
-    this.data.selectCollection(collectionMetadata, callbackProgress).then( (collection) => {
+    this.data.selectCollection(collectionMetadata, this.callbackProgress).then( (collection) => {
       this.setState({collectionMetadata: this.data.collectionsMetadata, mosaicPreviewNeeded: this.data.isReadyForMakingPreview()})
       this.setState({busy : false})
-      //this.makeMosaic(true)
     })
   }
 
@@ -78,7 +81,6 @@ class App extends Component {
     let done = () => {
       this.setState({targetData : this.data.target, mosaicPreviewNeeded: this.data.isReadyForMakingPreview()})
       this.setState({busy : false})
-      //this.makeMosaic(true)
     }
 
     let callbackProgress = (percent) => {
@@ -95,39 +97,61 @@ class App extends Component {
     console.log(params)
     this.data.parameters = params
 
-    this.setState({mosaicPreviewNeeded: this.data.isReadyForMakingPreview()})
-
-    let callbackProgress = (percent) => {
-      this.setState({progressPercent : percent})
-    }
 
     if (changedParam === 'numColRow') {
+      this.setState({mosaicPreviewNeeded: this.data.isReadyForMakingPreview()})
       if (this.data.target) {
-        this.setState({progressPercent : 0, hidePercent: false, busy : true, currentTask : "Extraction des couleurs"})
-        this.data.target.changeNumColRow(params.numColRow, callbackProgress).then( () => {
-          this.setState({busy : false})
-        })
+        this.data.mustReprocessTargetImage = true
       }
     }
     else if (changedParam === 'allowTileFlip') {
+      this.setState({mosaicPreviewNeeded: this.data.isReadyForMakingPreview()})
       this.data.mustReindex = true
     }
     else if (changedParam === 'distance') {
+      this.setState({mosaicPreviewNeeded: this.data.isReadyForMakingPreview()})
       this.data.mustReindex = true
     }
     else if (changedParam === 'repetition') {
+      this.setState({mosaicPreviewNeeded: this.data.isReadyForMakingPreview()})
       this.data.mustReindex = true
+    }
+    else if (changedParam === 'edgesFactor') {
+      this.setState({mosaicPreviewNeeded: this.data.isReadyForMakingPreview()})
+      this.data.mustReprocessTargetImage = true
+    }
+    else if (changedParam === 'edgesMergeMode') {
+      this.setState({blendMode: this.data.parameters.edgesMergeMode})
+    }
+    else if (changedParam === 'luminosityCorrection') {
+      this.setState({luminosityCorrection: this.data.parameters.luminosityCorrection})
     }
   }
 
-  makeMosaic() {
+  makePreview() {
+    console.log(`Launch preview. Analysis=${this.data.mustReprocessTargetImage}`)
+    if (this.data.mustReprocessTargetImage) {
+      this.setState({progressPercent : 0, hidePercent: false, busy : true, currentTask : "Analyse de l'image"})
+      this.data.target.changeNumColRow(this.data.parameters.numColRow, this.callbackProgress).then( () => {
+        this.data.mustReprocessTargetImage = false
+        this.setState({busy : false})
+        return this.makeMosaic()
+      })
+    }
+    else {
+      return this.makeMosaic()
+    }
+    
+  }
 
+  makeMosaic() {
     if (this.data.mustReindex === true) {
       this.setState({hidePercent: true, busy : true, currentTask : "Optimisation..."})
       this.data.initMosaic().then( () => {
         this.setState({busy : false, currentTask : "Optimisation terminée"})
-        this.makeMosaicPromise()
+        return this.makeMosaicPromise()
       }, () => {
+        // Error
         this.setState({busy : false, currentTask : "Optimisation terminée"})
       })
     }
@@ -177,7 +201,7 @@ class App extends Component {
   tabChanged(tid) {
     this.setState({ currentTab: tid}, () => {
       if (this.state.currentTab === 'tab-preview' && this.state.mosaicPreviewNeeded) {
-        this.makeMosaic()
+        this.makePreview()
       }
       else if (this.state.currentTab === 'tab-lowres' && this.state.serverRenderNeeded) {
         this.renderMosaic()
@@ -200,7 +224,7 @@ class App extends Component {
             mobileVisibility={this.state.mobileParametersVisible}
             initialParameters={this.data.parameters} 
             onParametersChanged={this.parametersChanged} 
-            onBuildMosaic={this.makeMosaic} 
+            onBuildMosaic={this.makePreview} 
             onRenderMosaic={this.renderMosaic} 
             serverRenderNeeded={this.state.serverRenderNeeded} 
             mosaicPreviewNeeded={this.state.mosaicPreviewNeeded}
@@ -209,7 +233,7 @@ class App extends Component {
             <TabSwitch selectedTab={this.state.currentTab} onTabChanged={this.tabChanged} />
             <Measure onMeasure={(dimensions) => {
               this.setState({tabViewDimensions : {width:dimensions.width, height:dimensions.height}})
-              console.log(this.state.tabViewDimensions.width)
+              //console.log(this.state.tabViewDimensions.width)
                }
             }>
               <div id="tabs">
@@ -225,9 +249,11 @@ class App extends Component {
                   height={this.state.tabViewDimensions.height}
                   previewData={this.state.previewData}
                   edgeImage={this.state.edgeImage}
+                  blendMode={this.state.blendMode}
+                  luminosityCorrection={this.state.luminosityCorrection}
                   previewTimestamp={this.state.previewTimestamp}
                   mosaicPreviewNeeded={this.state.mosaicPreviewNeeded}
-                  onRefreshButton={this.makeMosaic}
+                  onRefreshButton={this.makePreview}
                   />
                 </div>
                 <div id="mosaicLowres" className={this.state.currentTab === 'tab-lowres' ? 'shownTab' : 'hiddenTab'}>

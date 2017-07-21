@@ -39,7 +39,6 @@ class ParamMosaicSize extends Component {
 
   paramChanged(val)
   {
-    console.log(val)
     this.setState({ descr : this.valToText(this.props.mode === 'expert' ? this.refs.expertSize.value : val)})
 
     if (!val) {
@@ -47,7 +46,7 @@ class ParamMosaicSize extends Component {
       this.timeout = setTimeout( () => {
           this.props.onMosaicSizeChanged(this.refs.expertSize.value)
           
-      }, 200)
+      }, 1000)
     }
     else
     {

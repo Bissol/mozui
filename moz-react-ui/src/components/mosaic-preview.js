@@ -8,6 +8,8 @@ class MosaicPreview extends PureComponent {
   constructor(props) {
     super(props)
     this.buttonPressed = this.buttonPressed.bind(this)
+    this.intensityCorrection = this.props.intensityCorrection ? this.props.intensityCorrection : 0
+    this.blendMode = this.props.blendMode ? this.props.blendMode : 'luminosity'
 
     this.state = {currentZoom : 5}
   }
@@ -17,10 +19,12 @@ class MosaicPreview extends PureComponent {
   }
 
   componentDidUpdate() {
+    this.blendMode = this.props.blendMode ? this.props.blendMode : 'luminosity'
     this.drawPreview()
   }
 
   drawPreview() {
+    console.log(`Drawing preview using ${this.blendMode} mode`)
     const context = this.refs.canvas.getContext('2d')
     context.clearRect(0, 0, 2*this.props.width, 2*this.props.height)
 
@@ -54,7 +58,7 @@ class MosaicPreview extends PureComponent {
     // Draw edges
     if (this.props.edgeImage) {
       context.save()
-      context.globalCompositeOperation = 'luminosity'
+      context.globalCompositeOperation = this.blendMode
       context.drawImage(this.props.edgeImage, 0, 0, this.refs.canvas.width, this.refs.canvas.height)
       context.restore()
     }
@@ -86,13 +90,15 @@ class MosaicPreview extends PureComponent {
     }
 
     // Apply intensity correction
+    ctx.save()
+    ctx.globalCompositeOperation = 'source-over'
     ctx.beginPath()
     ctx.rect(x, y, numColRow*subsize, numColRow*subsize)
     let icc = elem.intensityCorrection > 0 ? 255 : 0
-    let alpha = Math.abs(elem.intensityCorrection) / 255
-    console.log(`Correction: ${elem.intensityCorrection} -> Color ${icc} alpha: ${alpha}`)
+    let alpha = Math.abs(elem.intensityCorrection * (this.props.luminosityCorrection * 0.8)) / 255
     ctx.fillStyle = `rgba(${icc}, ${icc}, ${icc}, ${alpha})`
     ctx.fill()
+    ctx.restore()
   }
 
   getHeight(width) {
@@ -117,7 +123,6 @@ class MosaicPreview extends PureComponent {
   }
 
   render() {
-    console.log(`Rendering mosaic preview (w=${this.props.width}, h=${this.props.height})`)
     let refreshButton = ''
     if (this.props.mosaicPreviewNeeded) {
       refreshButton = <input className='centerButton' type='button' onClick={() => this.buttonPressed()} value={"Mettre à jour"} />

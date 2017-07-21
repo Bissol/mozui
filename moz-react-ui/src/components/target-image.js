@@ -55,7 +55,7 @@ class TargetImage extends PureComponent {
   }
 
   render() {
-    console.log('Rendering target image (ready=' + (this.props.targetImage ? this.props.targetImage.ready : false) + ')')
+    //console.log('Rendering target image (ready=' + (this.props.targetImage ? this.props.targetImage.ready : false) + ')')
     
     return (
       <div className="TargetImageDiv">

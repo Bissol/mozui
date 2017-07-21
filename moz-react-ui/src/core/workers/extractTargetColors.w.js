@@ -14,7 +14,7 @@ self.addEventListener('message', function(e) {
       self.postMessage({type: 'result', data : res})
       break;
     case 'edges':
-      let edges = targetFcts.extractEdges(data.pixels, data.width, data.height, progressCallback)
+      let edges = targetFcts.extractEdges(data.pixels, data.width, data.height, data.edgesFactor, progressCallback)
       self.postMessage({type: 'edge_result', data : edges})
       break
     default:

@@ -28,7 +28,7 @@ class MosaicLowRes extends PureComponent {
   }
 
   render() {
-    console.log('Rendering mosaic (low resolution)')
+    //console.log('Rendering mosaic (low resolution)')
     let refreshButton = ''
     if (this.props.serverRenderNeeded) {
       refreshButton = <input className='centerButton' type='button' onClick={() => this.buttonPressed()} value={"Mettre à jour"} />

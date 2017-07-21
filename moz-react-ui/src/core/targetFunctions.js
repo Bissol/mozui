@@ -25,7 +25,7 @@ function extractColorInfo(imageElement, numCol, numRow, tileSize, matchSize, pix
   return colorData
 }
 
-function extractEdges(pixels, width, height, progressCallback)
+function extractEdges(pixels, width, height, edgesFactor, progressCallback)
 {
   // Make an empty image data
   let raw_result = new Uint8ClampedArray(pixels.data.length)
@@ -35,7 +35,7 @@ function extractEdges(pixels, width, height, progressCallback)
     progressCallback(Math.round(100 * (x / width)))
     for (let y=0; y<height; y++) {
       let roughness = getRoughnessAt(pixels, x, y, 2, width, 1)
-      let alpha = roughness * 0
+      let alpha = roughness * edgesFactor
       raw_result[((y * (pixels.width * 4)) + (x * 4)) + 0] = pixels.data[((y * (pixels.width * 4)) + (x * 4)) + 0]
       raw_result[((y * (pixels.width * 4)) + (x * 4)) + 1] = pixels.data[((y * (pixels.width * 4)) + (x * 4)) + 1]
       raw_result[((y * (pixels.width * 4)) + (x * 4)) + 2] = pixels.data[((y * (pixels.width * 4)) + (x * 4)) + 2]

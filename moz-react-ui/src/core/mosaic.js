@@ -12,17 +12,19 @@ class Mosaic {
     this.workers = []
     this.nbSeeds = 8
     this.mosaic_tile_size = 80
-    this.allowTileFlip = false
-    this.distanceParam = 0
-    this.repetitionParam = 0
+    this.globalParameters = undefined
+    // this.allowTileFlip = false
+    // this.distanceParam = 0
+    // this.edgesMergeMode = ''
+    // this.repetitionParam = 0
     this.seeds = []
     this.indexedCollections = []
     this.clusterer = new Cluster(this.target.colorData, this.nbSeeds)
-    this.localStorageCurrentKeyIndex = 0
-    this.sessionStorageCurrentKeyIndex = 0
+    // this.localStorageCurrentKeyIndex = 0
+    // this.sessionStorageCurrentKeyIndex = 0
     this.collectionCache = collection_cache
-    this.downloadedImages = 0
-    this.gottenFromCacheImages = 0
+    // this.downloadedImages = 0
+    // this.gottenFromCacheImages = 0
     this.ready = false
 
     this.result = {}
@@ -31,7 +33,7 @@ class Mosaic {
   indexCollectionsWithWorkers() {
     return new Promise( (resolve, reject) => {
       let worker = new CollectionsIndexingWorker()
-      worker.postMessage({cmd: 'start', seeds: this.seeds, collections: this.collections, allowTileFlip : this.allowTileFlip, distanceParam: this.distanceParam})
+      worker.postMessage({cmd: 'start', seeds: this.seeds, collections: this.collections, allowTileFlip : this.globalParameters.allowTileFlip, distanceParam: this.globalParameters.distance})
       worker.addEventListener("message", (event) => {
         if (!event.data) reject('indexCollectionsWithWorkers: no data')
         this.indexedCollections = event.data.data
@@ -44,7 +46,7 @@ class Mosaic {
   indexTilesWithWorkers() {
     return new Promise( (resolve, reject) => {
       let worker = new TargetTilesIndexingWorker()
-      worker.postMessage({cmd: 'start', seeds: this.seeds, tiles: this.target.colorData, distanceParam: this.distanceParam})
+      worker.postMessage({cmd: 'start', seeds: this.seeds, tiles: this.target.colorData, distanceParam: this.globalParameters.distance})
       worker.addEventListener("message", (event) => {
         if (!event.data) reject('indexTilesWithWorkers: no data')
         resolve(event.data.indexedTiles)
@@ -63,8 +65,8 @@ class Mosaic {
           worker_id: worker_id,
           tilesWithIndex: subset,
           indexedCollection: indexedCollection,
-          distanceParam: this.distanceParam,
-          repetitionParam: this.repetitionParam,
+          distanceParam: this.globalParameters.distance,
+          repetitionParam: this.globalParameters.repetition,
           numCol: this.target.numCol
         })
       worker.addEventListener("message", (event) => {
@@ -183,7 +185,7 @@ class Mosaic {
       let done = () => {
         const quality = 0.8
         canvas.getContext('2d').save()
-        canvas.getContext('2d').globalCompositeOperation = 'luminosity'
+        canvas.getContext('2d').globalCompositeOperation = this.globalParameters.edgesMergeMode
         canvas.getContext('2d').drawImage(this.target.edgeImage, 0, 0, mozaic_width, mozaic_height)
         canvas.getContext('2d').restore()
         let data = canvas.toDataURL("image/jpeg", quality)
@@ -304,6 +306,17 @@ class Mosaic {
         if (is_flipped) {
           canvas.getContext('2d').restore()
         }
+
+        // Apply intensity correction
+        canvas.getContext('2d').save()
+        canvas.getContext('2d').globalCompositeOperation = 'source-over'
+        canvas.getContext('2d').beginPath()
+        canvas.getContext('2d').rect(dx, dy, this.mosaic_tile_size, this.mosaic_tile_size)
+        let icc = tile.intensityCorrection > 0 ? 255 : 0
+        let alpha = Math.abs(tile.intensityCorrection * (this.globalParameters.luminosityCorrection * 0.8)) / 255
+        canvas.getContext('2d').fillStyle = `rgba(${icc}, ${icc}, ${icc}, ${alpha})`
+        canvas.getContext('2d').fill()
+        canvas.getContext('2d').restore()
 
         progressCallback(Math.round(100 * (i / tiles_to_process.length)))
         i++
@@ -497,7 +510,7 @@ class Mosaic {
         console.log('Color data not present in target. Getting it now.')
       }
     
-    this.seeds = this.clusterer.getClusterCenters(this.distanceParam)
+    this.seeds = this.clusterer.getClusterCenters(this.globalParameters.distance)
   }
 }
 
