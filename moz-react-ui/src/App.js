@@ -260,6 +260,7 @@ class App extends Component {
                   <MosaicLowRes 
                     imageSrc={this.state.srcMosaicLowres} 
                     width={this.state.tabViewDimensions.width}
+                    height={this.state.tabViewDimensions.height}
                     serverRenderNeeded={this.state.serverRenderNeeded} 
                   />
                 </div>

@@ -73,7 +73,7 @@ class Target {
           tmpcanvas.getContext('2d').putImageData(imgData, 0, 0)
           let tempimg = new Image()
           tempimg.src = tmpcanvas.toDataURL("image/png")
-          document.body.appendChild(tempimg)
+          //document.body.appendChild(tempimg)
           this.edgeImage = tempimg
           this.ready = true
           resolve()

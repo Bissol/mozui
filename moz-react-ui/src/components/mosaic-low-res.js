@@ -9,6 +9,7 @@ class MosaicLowRes extends PureComponent {
   constructor(props) {
     super(props)
     this.state = {currentZoom : 5}
+    this.ratio = this.props.height / this.props.width
   }
 
   setScale(v) {
@@ -35,12 +36,14 @@ class MosaicLowRes extends PureComponent {
     }
 
     return (
-      <div className="MosaicLowRes">
+      <div id="MosaicLowResCont">
         <RangeCtrl min={1} max={10} step={1} init={5} onNewValue={ (v) => this.setScale(v)} />
         {refreshButton}
-        <ElementPan>
-          <img src={this.props.imageSrc ? this.props.imageSrc : placeholderImg} ref="hdmozimage" width={this.getWidth()} alt="Mosaique" className="mosaicImage"/>
-        </ElementPan>
+        <div id="panwrap">
+          <ElementPan height={this.props.width * this.ratio * .8} >
+            <img src={this.props.imageSrc ? this.props.imageSrc : placeholderImg} ref="hdmozimage" width={this.getWidth()} alt="Mosaique" className="mosaicImage"/>
+          </ElementPan>
+        </div>
       </div>
     );
   }

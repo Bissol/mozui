@@ -1,0 +1,39 @@
+/*@media only screen and (max-device-height : 2400px) {
+	#MosaicLowResCont {
+		height: 2000px;
+	}
+}
+
+@media only screen and (max-device-height : 1800) {
+	#MosaicLowResCont {
+		height: 1600px;
+	}
+}
+
+@media only screen and (max-device-height : 1200px) {
+	#MosaicLowResCont {
+		height: 800px;
+	}
+}
+
+@media only screen and (max-device-height : 600px) {
+	#MosaicLowResCont {
+		height: 500px;
+	}
+}
+
+
+@media only screen and (min-device-height : 2401px) {
+	#MosaicLowResCont {
+		height: 2000px;
+	}
+}*/
+
+#MosaicLowResCont {
+	border: 1px solid black;
+	overflow: hidden;
+}
+
+#panwrap {
+	flex-grow: 1;
+}
