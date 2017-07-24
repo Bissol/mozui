@@ -78,7 +78,7 @@ function getRoughnessAt(pixels, x, y, half_square, width, step) {
 }
 
 // Extract tiles from an image
-function extractColorInfo2(pixels, width, height, numCol, numRow, tileSize, matchSize, pixSampling, progressCallback)
+function extractColorInfo2(pixels, numCol, numRow, tileSize, matchSize, pixSampling, progressCallback)
 {
   // Create structure
   let colorData = new Array(numCol * numRow)

@@ -35,6 +35,7 @@ class LessMoreControl extends Component {
 
     if (val !== 0) {
       let sv = this.props.value + val
+      if (isNaN(sv)) sv = this.min
       console.log(`sv=${sv} val = ${val} step=${this.step} propsval=${this.props.value}`)
       this.props.onValueChanged(sv)
     }
@@ -47,9 +48,7 @@ class LessMoreControl extends Component {
     return (
       <div className='LessMoreControl'>
         <input type='button' disabled={disless} className='rangeButton' value={this.lessButtonLabel} onClick={() => this.modifyValue(this.step * -1)} />
-        
-
-        <span>{this.props.value}</span>
+        <meter min={this.min - this.step} low={this.max * 0.2} high={this.max * 0.8} max={this.max} value={this.props.value}></meter>
         <input type='button' disabled={dismore} className='rangeButton' value={this.moreButtonLabel} onClick={() => this.modifyValue(this.step)} />
       </div>
     );

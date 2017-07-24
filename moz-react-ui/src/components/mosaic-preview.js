@@ -39,8 +39,9 @@ class MosaicPreview extends PureComponent {
       let tileArray = this.props.previewData.data
       let numCol = this.props.previewData.w
       let numRow = this.props.previewData.h
-      let tileSize = this.props.width / numCol// numRow > numCol ? (this.props.width / numRow) : (this.props.height / numCol)
-      tileSize = Math.round(tileSize)
+      let remainder = this.props.width % (numCol * 4)
+      let tileSize = (this.props.width - remainder) / numCol
+      //tileSize = Math.round(tileSize)
       //console.log(`Width=${this.props.width} numCol=${numCol} numRow=${numRow} tileSize=${tileSize}`)
 
       for (var i=0; i<numCol; i++) {
@@ -53,16 +54,17 @@ class MosaicPreview extends PureComponent {
         }
       }
 
+      // Draw edges
+      if (this.props.edgeImage) {
+        console.log(`edges ${numCol * tileSize},${numRow * tileSize}`)
+        context.save()
+        context.globalCompositeOperation = this.blendMode
+        context.drawImage(this.props.edgeImage, 0, 0, numCol * tileSize, numRow * tileSize)
+        context.restore()
+      }
     }
 
-    // Draw edges
-    if (this.props.edgeImage) {
-      context.save()
-      context.globalCompositeOperation = this.blendMode
-      context.drawImage(this.props.edgeImage, 0, 0, this.refs.canvas.width, this.refs.canvas.height)
-      context.restore()
-    }
-
+    
     context.restore()
   }
 
@@ -71,8 +73,8 @@ class MosaicPreview extends PureComponent {
     if (!elem.d) return
 
     // Some useful comment
-    const x = Math.ceil(i * size)
-    const y = Math.ceil(j * size)
+    const x = i * size
+    const y = j * size
     const numColRow = Math.sqrt(elem.d.nbsub)
     var subsize = Math.round(size / numColRow)
 
@@ -94,9 +96,12 @@ class MosaicPreview extends PureComponent {
     ctx.globalCompositeOperation = 'source-over'
     ctx.beginPath()
     ctx.rect(x, y, numColRow*subsize, numColRow*subsize)
-    let icc = elem.intensityCorrection > 0 ? 255 : 0
-    let alpha = Math.abs(elem.intensityCorrection * (this.props.luminosityCorrection * 0.8)) / 255
-    ctx.fillStyle = `rgba(${icc}, ${icc}, ${icc}, ${alpha})`
+    // let icc = elem.intensityCorrection > 0 ? 255 : 0
+    let targetColor = elem.targetColor
+    // let alpha = Math.abs(elem.intensityCorrection * (this.props.luminosityCorrection * 0.8)) / 255
+    let alpha = this.props.luminosityCorrection / 12
+    // ctx.fillStyle = `rgba(${icc}, ${icc}, ${icc}, ${alpha})`
+    ctx.fillStyle = `rgba(${targetColor.r}, ${targetColor.g}, ${targetColor.b}, ${alpha})`
     ctx.fill()
     ctx.restore()
   }

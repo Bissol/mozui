@@ -312,9 +312,12 @@ class Mosaic {
         canvas.getContext('2d').globalCompositeOperation = 'source-over'
         canvas.getContext('2d').beginPath()
         canvas.getContext('2d').rect(dx, dy, this.mosaic_tile_size, this.mosaic_tile_size)
-        let icc = tile.intensityCorrection > 0 ? 255 : 0
-        let alpha = Math.abs(tile.intensityCorrection * (this.globalParameters.luminosityCorrection * 0.8)) / 255
-        canvas.getContext('2d').fillStyle = `rgba(${icc}, ${icc}, ${icc}, ${alpha})`
+        let targetColor = tile.targetColor
+        let alpha = this.globalParameters.luminosityCorrection / 12
+        canvas.getContext('2d').fillStyle = `rgba(${targetColor.r}, ${targetColor.g}, ${targetColor.b}, ${alpha})`
+        // let icc = tile.intensityCorrection > 0 ? 255 : 0
+        // let alpha = Math.abs(tile.intensityCorrection * (this.globalParameters.luminosityCorrection * 0.8)) / 255
+        // canvas.getContext('2d').fillStyle = `rgba(${icc}, ${icc}, ${icc}, ${alpha})`
         canvas.getContext('2d').fill()
         canvas.getContext('2d').restore()
 

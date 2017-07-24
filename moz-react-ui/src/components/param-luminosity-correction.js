@@ -20,6 +20,8 @@ class ParamLuminosityCorrection extends Component {
       4: `Forte correction`
     }
 
+    this.PRECISION = 10
+
     this.state = {value: this.props.luminosityCorrection}
 
     this.luminosityCorrectionChanged = this.luminosityCorrectionChanged.bind(this)
@@ -35,7 +37,7 @@ class ParamLuminosityCorrection extends Component {
   render() {
     let Input = ''
     if (this.props.mode && this.props.mode === 'expert') {
-      Input = <LessMoreControl value={this.state.value} nbValues={5} onValueChanged={this.luminosityCorrectionChanged} />
+      Input = <LessMoreControl value={this.state.value} nbValues={this.PRECISION} onValueChanged={this.luminosityCorrectionChanged} />
     }
     else if (this.props.mode === 'simple') {
       Input = ''
@@ -46,7 +48,7 @@ class ParamLuminosityCorrection extends Component {
       <div className='ParamLuminosityCorrection param'>
       <p className="paramTitle">Correction de l'éclairage</p>
       {Input}
-      <p>{this.val2txt[this.state.value]}</p>
+      <p>{this.val2txt[Math.floor(this.state.value * (Object.keys(this.val2txt).length / this.PRECISION))]}</p>
       </div>
     );
   }

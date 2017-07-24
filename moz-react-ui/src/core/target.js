@@ -8,8 +8,10 @@ class Target {
     this.imageSrcData = imageSrcData
     this.imageElement = new Image()
     this.maxImgLongSide = 600
-    this.width = -1
+    this.width = -1 // Size of loaded image after resizing (maximglongside * ...)
     this.height = -1
+    this.actualWidth = -1 // Actual width of target image used for tiles
+    this.actualHeight = -1
     this.defaultNumColRow = 50
     this.numColRow = initialNumColRow ? initialNumColRow : this.defaultNumColRow
     this.numCol = 0
@@ -51,9 +53,9 @@ class Target {
   changeNumColRow(ncr, progressCallback) {
     return new Promise( (resolve, reject) => {
       this.setNumColRow(ncr)
-      let pixels = this.context.getImageData(0, 0, this.width, this.height)
+      let pixels = this.context.getImageData(0, 0, this.actualWidth, this.actualHeight)
       let worker = new ExtractTargetColorsWorker()
-      worker.postMessage({cmd: 'start', pixels : pixels, width: this.width, height: this.height, numCol : this.numCol, numRow : this.numRow, tileSize : this.tileSize, matchSize : this.matchSize, pixSampling : this.pixSampling})
+      worker.postMessage({cmd: 'start', pixels : pixels, numCol : this.numCol, numRow : this.numRow, tileSize : this.tileSize, matchSize : this.matchSize, pixSampling : this.pixSampling})
       worker.addEventListener("message", (event) => {
         if (event.data.type === 'progress') {
           progressCallback(event.data.percent)
@@ -68,8 +70,8 @@ class Target {
           let imgData = event.data.data
           // Create fucking tmp canvas instead of using THIS
           let tmpcanvas = document.createElement('canvas')
-          tmpcanvas.width = this.width
-          tmpcanvas.height = this.height
+          tmpcanvas.width = this.actualWidth
+          tmpcanvas.height = this.actualHeight
           tmpcanvas.getContext('2d').putImageData(imgData, 0, 0)
           let tempimg = new Image()
           tempimg.src = tmpcanvas.toDataURL("image/png")
@@ -80,13 +82,6 @@ class Target {
         }
       })
     })
-
-
-    // this.setNumColRow(ncr)
-    // return new Promise( (resolve, reject) => {
-    //   this.extractColorInfo()
-    //   resolve()
-    // })
   }
 
   setNumColRow(ncr)
@@ -96,7 +91,10 @@ class Target {
     this.numRow = this.width <= this.height ? this.numColRow : Math.round(this.numColRow * (this.height / this.width))
     const longSide = this.width > this.height ? this.width : this.height
     this.tileSize = Math.floor(longSide / this.numColRow)
+    this.actualWidth = this.tileSize * this.numCol
+    this.actualHeight = this.tileSize * this.numRow
     this.colorData = new Array(this.numCol * this.numRow)
+    console.log(`Target initial(${this.width}, ${this.height}) actual(${this.actualWidth}, ${this.actualHeight})`)
   }
   
   extractColorInfo()

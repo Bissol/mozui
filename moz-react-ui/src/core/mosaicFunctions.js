@@ -179,7 +179,7 @@ function findBestMatch(t, tiles, distanceParam, numCol, penalties, repetitionPar
         tt.d.avg = avg
         let tt_intensity = intensity(tt.d.avg)
       }
-      tt.intensityCorrection = intensity(t.avg) - intensity(tt.d.avg)
+      tt.targetColor = t.avg
       best = tt
     }
   })
