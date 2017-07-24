@@ -23,21 +23,18 @@ class ParamEdges extends Component {
     }
 
     this.blendModeOptions = {
-      'luminosity': `description pour luminosité`,
-      'color': `description pour color`,
-      'saturation': `description pour saturation`,
-      'hue': `description pour hue`,
-      'exclusion': `description pour exclusion`,
-      'soft-light': 'soft-light',
-      'hard-light' : 'hard light',
-      'color-burn': 'color-burn',
-      'color-dodge' : 'color-dodge',
-      'lighten' : 'lighten',
-      'darken' : 'darken',
-      'overlay' : 'overlay',
-      'multiply' : 'multiply',
-      'screen' : 'screen'
+      'hard-light' : 'Contours sombres',
+      'soft-light': 'Contours doux',
+      'color-burn': 'Contours appuyés',
+      'color-dodge' : 'Contours lumineux',
+      'lighten' : 'Esquisse claire',
+      'darken' : 'Esquisse sombre',
+      'overlay' : 'Haut contraste',
+      'multiply' : 'Assombrir',
+      'screen' : 'Eclairicr'
     }
+
+    this.PRECISION = 5
 
     this.state = {blendMode: this.props.blendMode ? this.props.blendMode : 'luminosity',
                   value: this.props.edgesFactor}
@@ -65,8 +62,8 @@ class ParamEdges extends Component {
     if (this.props.mode && this.props.mode === 'expert') {
       const options = Object.keys(this.blendModeOptions).map( (bm) => <option key={bm} value={bm}> {this.blendModeOptions[bm]}</option>)
       Input = <div>
-                <LessMoreControl value={this.state.value} nbValues={5} onValueChanged={this.edgesFactorChanged} />
-                <select value={this.state.blendMode} onChange={this.blendModeChanged}>{options}</select>
+                <LessMoreControl value={this.state.value} nbValues={this.PRECISION} onValueChanged={this.edgesFactorChanged} />
+                Type : <select value={this.state.blendMode} onChange={this.blendModeChanged}>{options}</select>
               </div>
     }
     else if (this.props.mode === 'simple') {
@@ -78,7 +75,7 @@ class ParamEdges extends Component {
       <div className='ParamEdges param'>
       <p className="paramTitle">Renforcement des contours</p>
       {Input}
-      <p>{this.val2txt[this.state.value]}</p>
+      <p>{this.val2txt[Math.floor(this.state.value * (Object.keys(this.val2txt).length / this.PRECISION))]}</p>
       </div>
     );
   }
