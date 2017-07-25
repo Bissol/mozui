@@ -7,11 +7,11 @@ class ParamRepetition extends Component {
     super(props)
 
     this.val2txt = { 
-      0: `Répétition autorisée`,
-      20: `Un peu moins de répétitions`,
-      40: `Moins de répétitions`,
-      60: `Minimise les répétitions`,
-      80: `Répétitions minimisées`
+      0: `Qualité favorisée : Images répétées sans limite`,
+      20: `Qualité favorisée : Images répétées fréquentes`,
+      40: `Equilibre entre diversité et qualité`,
+      60: `Diversité favorisée : Beaucoup d'images différentes utilisées`,
+      80: `Diversité favorisée : Un maximum d'images différentes sont utilisées`
     }
     // this.SMALL_PENALTY = 10
     // this.AVERAGE_PENALTY = 30
@@ -29,7 +29,7 @@ class ParamRepetition extends Component {
   render() {
     let Input = ''
     if (this.props.mode && this.props.mode === 'expert') {
-      Input = <LessMoreControl value={this.state.value} nbValues={5} step={20} onValueChanged={this.paramChanged} />
+      Input = <LessMoreControl lessButtonLabel='Autoriser' moreButtonLabel='Eviter' value={this.state.value} nbValues={5} step={20} onValueChanged={this.paramChanged} />
     }
     else if (this.props.mode === 'simple') {
       Input = ''

@@ -1,6 +1,7 @@
 import React, { PureComponent } from 'react';
 import './mosaic-preview.css';
-import RangeCtrl from './rangeControl'
+import placeholderImg from '../../public/Mosaic_wall.jpg'
+import OpenSeaDragon from 'openseadragon'
 
 
 class MosaicPreview extends PureComponent {
@@ -11,27 +12,42 @@ class MosaicPreview extends PureComponent {
     this.intensityCorrection = this.props.intensityCorrection ? this.props.intensityCorrection : 0
     this.blendMode = this.props.blendMode ? this.props.blendMode : 'luminosity'
 
-    this.state = {currentZoom : 5}
+    this.canvas = document.createElement('canvas')
+
+    this.viewer = undefined
+    this.imgData = undefined
+    this.ratio = this.props.height / this.props.width
   }
 
   componentDidMount() {
-    this.drawPreview()
+
+    this.viewer = OpenSeaDragon({
+      id: "osdmozprev",
+      prefixUrl: "",
+      showNavigator:  true,
+      tileSources: {
+        type: 'image',
+        url: this.imgData ? this.imgData : placeholderImg
+      },
+      debugMode: false,
+    })
   }
 
   componentDidUpdate() {
     this.blendMode = this.props.blendMode ? this.props.blendMode : 'luminosity'
     this.drawPreview()
+    this.viewer.open({
+      type: 'image',
+      url: this.imgData ? this.imgData : placeholderImg
+    })
   }
 
   drawPreview() {
     console.log(`Drawing preview using ${this.blendMode} mode`)
-    const context = this.refs.canvas.getContext('2d')
-    context.clearRect(0, 0, 2*this.props.width, 2*this.props.height)
 
-    const vtr = [0, .1, .3, .5, .7, .9, 1.2, 1.5, 1.8, 2.5, 5]
-    const scaleFactor = vtr[this.state.currentZoom]
-    context.save()
-    context.scale(scaleFactor, scaleFactor)
+    this.canvas.getContext('2d').clearRect(0, 0, 2*this.props.width, 2*this.props.height)
+
+    this.canvas.getContext('2d').save()
 
     if (this.props.previewData) {
 
@@ -39,8 +55,9 @@ class MosaicPreview extends PureComponent {
       let tileArray = this.props.previewData.data
       let numCol = this.props.previewData.w
       let numRow = this.props.previewData.h
-      let remainder = this.props.width % (numCol * 4)
-      let tileSize = (this.props.width - remainder) / numCol
+      let tileSize = 25
+      this.canvas.width = numCol * tileSize
+      this.canvas.height = numRow * tileSize
       //tileSize = Math.round(tileSize)
       //console.log(`Width=${this.props.width} numCol=${numCol} numRow=${numRow} tileSize=${tileSize}`)
 
@@ -49,7 +66,7 @@ class MosaicPreview extends PureComponent {
           const index = i + numCol*j
           let elem = tileArray[index]
           if (elem) {
-            this.displayInCanvas(elem, context, i, j, tileSize)
+            this.displayInCanvas(elem, this.canvas.getContext('2d'), i, j, tileSize)
           }
         }
       }
@@ -57,15 +74,18 @@ class MosaicPreview extends PureComponent {
       // Draw edges
       if (this.props.edgeImage) {
         console.log(`edges ${numCol * tileSize},${numRow * tileSize}`)
-        context.save()
-        context.globalCompositeOperation = this.blendMode
-        context.drawImage(this.props.edgeImage, 0, 0, numCol * tileSize, numRow * tileSize)
-        context.restore()
+        this.canvas.getContext('2d').save()
+        this.canvas.getContext('2d').globalCompositeOperation = this.blendMode
+        this.canvas.getContext('2d').drawImage(this.props.edgeImage, 0, 0, numCol * tileSize, numRow * tileSize)
+        this.canvas.getContext('2d').restore()
       }
+
+      this.imgData = this.canvas.toDataURL('image/jpeg', 0.6)
     }
+    
+    this.canvas.getContext('2d').restore()
 
     
-    context.restore()
   }
 
   // Display tile at given position in a canvas
@@ -106,28 +126,13 @@ class MosaicPreview extends PureComponent {
     ctx.restore()
   }
 
-  getHeight(width) {
-    let f = 1
-    if (this.props.previewData) {
-      f = this.props.previewData.h / this.props.previewData.w
-      //console.log(f)
-    }
-
-    return Math.round(width * f)
-  }
-
-  setScale(v) {
-    this.setState({currentZoom: v}, () => {
-      this.drawPreview()
-    })
-  }
-
   buttonPressed()
   {
     this.props.onRefreshButton()
   }
 
   render() {
+    //<canvas ref="canvas" className="MosaicPreviewCanvas" width={this.props.width} height={this.getHeight(this.props.width)}/>
     let refreshButton = ''
     if (this.props.mosaicPreviewNeeded) {
       refreshButton = <input className='centerButton' type='button' onClick={() => this.buttonPressed()} value={"Mettre à jour"} />
@@ -135,9 +140,8 @@ class MosaicPreview extends PureComponent {
 
     return (
         <div>
-          <RangeCtrl min={1} max={10} step={1} init={5} onNewValue={ (v) => this.setScale(v)} />
             {refreshButton}
-            <canvas ref="canvas" className="MosaicPreviewCanvas" width={this.props.width} height={this.getHeight(this.props.width)}/>
+            <div id="osdmozprev" style={{width: this.props.width, height: this.props.width * this.ratio * .9}} ></div>
         </div>
     );
   }

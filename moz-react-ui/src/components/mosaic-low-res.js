@@ -1,8 +1,7 @@
 import React, { PureComponent } from 'react';
 import './mosaic-low-res.css';
 import placeholderImg from '../../public/placeholder.jpg'
-import RangeCtrl from './rangeControl'
-let ElementPan = require('react-element-pan');
+import OpenSeaDragon from 'openseadragon'
 
 class MosaicLowRes extends PureComponent {
 
@@ -10,6 +9,7 @@ class MosaicLowRes extends PureComponent {
     super(props)
     this.state = {currentZoom : 5}
     this.ratio = this.props.height / this.props.width
+    this.viewer = undefined
   }
 
   setScale(v) {
@@ -28,8 +28,35 @@ class MosaicLowRes extends PureComponent {
     this.props.onRefreshButton()
   }
 
+  componentDidUpdate() {
+    this.viewer.open({
+      type: 'image',
+      url: this.props.imageSrc ? this.props.imageSrc : placeholderImg
+    })
+  }
+
+  componentDidMount() {
+    this.viewer = OpenSeaDragon({
+      id: "osdmoz",
+      prefixUrl: "",
+      showNavigator:  true,
+      tileSources: {
+        type: 'image',
+        url: this.props.imageSrc ? this.props.imageSrc : placeholderImg
+      },
+      debugMode: false,
+    })
+
+  }
+
   render() {
     //console.log('Rendering mosaic (low resolution)')
+    //<RangeCtrl min={1} max={10} step={1} init={5} onNewValue={ (v) => this.setScale(v)} />
+    // <div id="panwrap">
+    //       <ElementPan height={this.props.width * this.ratio * .9} >
+    //         <img src={this.props.imageSrc ? this.props.imageSrc : placeholderImg} ref="hdmozimage" width={this.getWidth()} alt="Mosaique" className="mosaicImage"/>
+    //       </ElementPan>
+    //</div>
     let refreshButton = ''
     if (this.props.serverRenderNeeded) {
       refreshButton = <input className='centerButton' type='button' onClick={() => this.buttonPressed()} value={"Mettre à jour"} />
@@ -37,13 +64,11 @@ class MosaicLowRes extends PureComponent {
 
     return (
       <div id="MosaicLowResCont">
-        <RangeCtrl min={1} max={10} step={1} init={5} onNewValue={ (v) => this.setScale(v)} />
+        <div id="osdmoz" style={{width: this.props.width, height: this.props.width * this.ratio * .9}} ></div>
+        
         {refreshButton}
-        <div id="panwrap">
-          <ElementPan height={this.props.width * this.ratio * .8} >
-            <img src={this.props.imageSrc ? this.props.imageSrc : placeholderImg} ref="hdmozimage" width={this.getWidth()} alt="Mosaique" className="mosaicImage"/>
-          </ElementPan>
-        </div>
+        
+        
       </div>
     );
   }
