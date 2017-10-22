@@ -14,7 +14,7 @@ class MosaicData {
     this.target = undefined
 
     // Collections
-    this.collectionMetadataUrl = serverUrl + 'php/collectionsDescription.json'
+    this.collectionMetadataUrl = "http://funzaic.debarena.com/api/collections"// serverUrl + 'php/collectionsDescription.json'
     this.collectionsMetadata = undefined
     this.collections = []
     this.collections.push({name: 'Mes images', data: []})
@@ -25,7 +25,7 @@ class MosaicData {
     this.mosaic = undefined
     this.mustReindex = false
     this.mustReprocessTargetImage = false
-    this.mosaic_tile_size = 80
+    this.mosaic_tile_size = 100
 
     // Parameters
     const parametersDefault = {
@@ -67,14 +67,25 @@ class MosaicData {
   initializeCollections() {
   	return fetch(this.collectionMetadataUrl)
 	  .then( (response) => {
+      //console.log(response)
 	    return response.json()
 	  }).then( (json) => {
-	    //console.log('parsed json', json)
-	    let collections = json.collections
-	    collections = collections.map( c => {c.checked = false; c.loaded = c.isMyCollection ? true : false; return c})
+	    console.log('parsed json', json)
+	    let collections = json
+	    collections = collections.map( c => {
+        let nc = {}
+        nc.checked = false;
+        nc.loaded = c.isMyCollection ? true : false;
+        nc.name_fr = c.field_name_fr[0].value;
+        nc.name_eng = c.field_name_eng[0].value;
+        nc.nb_images = c.field_nbimages[0].value;
+        nc.dir = c.field_dir[0].value;
+        nc.is_adult = c.field_isadult.length === 0 ? false : c.field_isadult[0].value;
+        return nc
+      })
 	    return this.collectionsMetadata = collections
 	  }).catch(function(ex) {
-	    console.error('parsing failed', ex)
+	    console.error('JSON pourri : ', ex)
 	  })
   }
 
