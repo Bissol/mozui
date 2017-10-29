@@ -6,6 +6,7 @@ import ParamDistance from './param-distance.js';
 import ParamRepetition from './param-repetition.js';
 import ParamEdges from './param-edges.js';
 import ParamLuminosityCorrection from './param-luminosity-correction.js';
+import ParamTileSize from './param-tile-size.js';
 
 class MosaicParameters extends PureComponent {
 
@@ -19,6 +20,7 @@ class MosaicParameters extends PureComponent {
     this.edgesFactorChanged = this.edgesFactorChanged.bind(this)
     this.edgesMergeModeChanged = this.edgesMergeModeChanged.bind(this)
     this.luminosityCorrectionChanged = this.luminosityCorrectionChanged.bind(this)
+    this.tileSizeChanged = this.tileSizeChanged.bind(this)
     
     const mode_DEFAULT = 'simple'
     this.state = 
@@ -95,6 +97,15 @@ class MosaicParameters extends PureComponent {
     })
   }
 
+  tileSizeChanged(val) {
+    let tmpState = this.state.parameters
+    tmpState.tileSize = val
+    this.setState({parameters: tmpState}, () => {
+      localStorage.setItem('tileSize', val)
+      this.props.onParametersChanged(this.state.parameters, 'tileSize')
+    })
+  }
+
   // =================================================================== ACTIONS ============================================================
 
   buildMosaic() {
@@ -113,6 +124,7 @@ class MosaicParameters extends PureComponent {
       <div id="MosaicParametersDiv" className={this.props.mobileVisibility ? "mobileShow" : "mobileHide"}>
         <div className="param"><span>Mode simple</span><input type="checkbox" defaultChecked={this.state.mode === 'simple'} onChange={() => this.toggleMode()}/></div>
         <ParamMosaicSize mode={this.state.mode} value={parseInt(this.state.parameters.numColRow, 10)} onMosaicSizeChanged={this.mosaicSizeChanged}/>
+        <ParamTileSize mode={this.state.mode} tileSize={parseInt(this.state.parameters.tileSize, 10)} onTileSizeChanged={this.tileSizeChanged}/>
         <ParamAllowTileFlip mode={this.state.mode} value={this.state.parameters.allowTileFlip} onAllowTileFlip={this.allowTileFlip} />
         <ParamDistance mode={this.state.mode} value={this.state.parameters.distance } onDistanceChanged={this.distanceChanged}/>
         <ParamRepetition mode={this.state.mode} value={this.state.parameters.repetition } onRepetitionChanged={this.repetitionChanged}/>

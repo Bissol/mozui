@@ -14,8 +14,8 @@ class MosaicData {
     this.target = undefined
 
     // Collections
-    this.collectionMetadataUrl = "http://funzaic.debarena.com/api/collections"// serverUrl + 'php/collectionsDescription.json'
-    this.collectionsMetadata = undefined
+    this.collectionMetadataUrl = "http://funzaic.com/api/collections"// serverUrl + 'php/collectionsDescription.json'
+    this.collectionsMetadata = []
     this.collections = []
     this.collections.push({name: 'Mes images', data: []})
     this.collectionCache = {}
@@ -33,9 +33,10 @@ class MosaicData {
       allowTileFlip_DEFAULT : true,
       distance_DEFAULT : 50,
       repetition_DEFAULT : 30,
-      edgesFactor_DEFAULT : 2,
-      edgesMergeMode_DEFAULT : 'luminosity',
-      luminosityCorrection_DEFAULT : 2,
+      edgesFactor_DEFAULT : 1,
+      edgesMergeMode_DEFAULT : 'screen',
+      luminosityCorrection_DEFAULT : 5,
+      tileSize_DEFAULT : 2
     }
     
     let check= (paramkey) => {
@@ -49,14 +50,31 @@ class MosaicData {
     }
 
     this.parameters = { 
-          numColRow : check('numColRow'),
-          allowTileFlip : check('allowTileFlip'),
-          distance : check('distance'),
-          repetition : check('repetition'),
-          edgesFactor : check('edgesFactor'),
-          edgesMergeMode : check('edgesMergeMode'),
-          luminosityCorrection : check('luminosityCorrection')
-        }
+      numColRow : check('numColRow'),
+      allowTileFlip : check('allowTileFlip'),
+      distance : check('distance'),
+      repetition : check('repetition'),
+      edgesFactor : check('edgesFactor'),
+      edgesMergeMode : check('edgesMergeMode'),
+      luminosityCorrection : check('luminosityCorrection'),
+      tileSize: check('tileSize')
+    }
+
+    this.changeTileSize()
+  }
+
+  changeTileSize() {
+    const ar = [50,75,100,125,150]
+    if (this.parameters.tileSize < 0 || this.parameters.tileSize > 4) {
+      console.error(`Bad tile size: ${this.parameters.tileSize}`)
+      return false
+    }
+    else {
+      this.mosaic_tile_size = ar[this.parameters.tileSize]
+      this.collectionCache = {}
+      this.collectionsMetadata.forEach(col => col.loaded = false)
+      console.log(`Tile size changed to ${this.mosaic_tile_size}`)
+    }
   }
  
   setTarget(imgData, callback, callbackProgress) {

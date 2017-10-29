@@ -23,7 +23,7 @@ class MosaicPreview extends PureComponent {
 
     this.viewer = OpenSeaDragon({
       id: "osdmozprev",
-      prefixUrl: "",
+      prefixUrl: "/sites/default/files/mosaic/",
       showNavigator:  true,
       tileSources: {
         type: 'image',

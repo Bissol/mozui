@@ -28,5 +28,6 @@ input[type=radio]:checked + label {
 }
 
 .tabswitchicon {
-  width:30px;
+  width:22px;
+  padding-right: 3px;
 }

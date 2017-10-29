@@ -22,7 +22,7 @@ class TargetImage extends PureComponent {
   }
 
   componentDidMount() {
-    fetch("http://funzaic.debarena.com/api/sample_images")
+    fetch("http://funzaic.com/api/sample_images")
     .then( (response) => {
       return response.json()
     }).then( (json) => {
@@ -81,15 +81,16 @@ class TargetImage extends PureComponent {
     const listItems = this.state.sampleImages.map((item) =>
       <img width="80px" key={item.nid[0].value} src={item.field_image_exemple[0].url} alt={item.field_image_exemple[0].alt} onClick={() => this.props.onTargetImageChanged(item.field_image_exemple[0].url)} />
     );
-    
+
     return (
       <div className="TargetImageDiv">
         <img src={this.props.targetImage ? this.props.targetImage.imageSrcData : placeholderImg} alt="La cible de ma mosaique !" className="TargetImage"/>
         <div id="filePicker">
-          <label id="lblfile" htmlFor="filepkr">Choisissez une image</label><br/>
+          <label id="lblfile" htmlFor="filepkr">Envoyez une image...</label><br/>
           <input ref="targetImageInput" id="filepkr" type="file" accept="image/*" onChange={ () => {this.targetChanged()} } />
         </div>
         <div className="SampleImagesContainer">
+          <p>Ou essayez avec une de ces images :</p>
           {listItems}
         </div>
         

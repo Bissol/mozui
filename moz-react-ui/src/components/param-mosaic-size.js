@@ -12,11 +12,13 @@ class ParamMosaicSize extends Component {
     this.timeout = null
     this.paramChanged = this.paramChanged.bind(this)
 
+    this.state = { descr : this.valToText(this.props.value)}
+  }
+
+  componentWillMount() {
     if (this.props.mode === 'simple' && (this.props.value !== this.SMALL_MOZAIC && this.props.value !== this.AVERAGE_MOZAIC && this.props.value !== this.LARGE_MOZAIC)) {
       this.paramChanged(this.AVERAGE_MOZAIC)
     }
-
-    this.state = { descr : this.valToText(this.props.value)}
   }
 
   valToText(val) {

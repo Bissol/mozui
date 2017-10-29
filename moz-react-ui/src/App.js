@@ -126,6 +126,13 @@ class App extends Component {
     else if (changedParam === 'luminosityCorrection') {
       this.setState({luminosityCorrection: this.data.parameters.luminosityCorrection})
     }
+    else if (changedParam === 'tileSize') {
+      console.log(`Tile size changed`)
+      this.data.changeTileSize()
+      if (!this.state.serverRenderNeeded) {
+        this.setState({serverRenderNeeded : this.data.isReadyForMakingPreview() && !this.state.mosaicPreviewNeeded})
+      }
+    }
   }
 
   makePreview() {
@@ -167,7 +174,7 @@ class App extends Component {
       this.setState({progressPercent : percent})
     }
 
-    console.log('Server render launched')
+    console.log('Rendering started')
     this.setState({hidePercent: !clientSideRendering, busy : true, currentTask : "Création de votre mosaïque"})
     this.data.renderLowResMosaic(true, progressCallback).then( (src) => {
       this.setState({srcMosaicLowres : src, busy : false, serverRenderNeeded: false})
@@ -238,7 +245,10 @@ class App extends Component {
             }>
               <div id="tabs">
                 <div id="targetImage" className={this.state.currentTab === 'tab-target' ? 'shownTab' : 'hiddenTab'}>
-                  <TargetImage targetImage={this.state.targetData} onTargetImageChanged={this.targetImageChanged}/>
+                  <TargetImage 
+                    targetImage={this.state.targetData}
+                    onTargetImageChanged={this.targetImageChanged}
+                  />
                 </div>
                 <div id="selectCollections" className={this.state.currentTab === 'tab-collec' ? 'shownTab' : 'hiddenTab'}>
                   <CollectionPicker collections={this.state.collectionMetadata} onCollectionSelected={this.collectionChecked} addImageToMyCollection={this.addImageToMyCollection}/>

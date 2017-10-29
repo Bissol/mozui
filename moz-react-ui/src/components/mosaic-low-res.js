@@ -38,7 +38,7 @@ class MosaicLowRes extends PureComponent {
   componentDidMount() {
     this.viewer = OpenSeaDragon({
       id: "osdmoz",
-      prefixUrl: "",
+      prefixUrl: "/sites/default/files/mosaic/",
       showNavigator:  true,
       tileSources: {
         type: 'image',

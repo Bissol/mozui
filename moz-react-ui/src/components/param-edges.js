@@ -31,7 +31,7 @@ class ParamEdges extends Component {
       'darken' : 'Esquisse sombre',
       'overlay' : 'Haut contraste',
       'multiply' : 'Assombrir',
-      'screen' : 'Eclairicr'
+      'screen' : 'Eclaircir'
     }
 
     this.PRECISION = 5
