@@ -50,6 +50,8 @@ class MosaicLowRes extends PureComponent {
   }
 
   render() {
+    // Download link
+    const dl_link = this.props.imageSrc ? <a href={this.props.imageSrc} download="mosaique.jpg">Télécharger</a> : ''
     //console.log('Rendering mosaic (low resolution)')
     //<RangeCtrl min={1} max={10} step={1} init={5} onNewValue={ (v) => this.setScale(v)} />
     // <div id="panwrap">
@@ -64,6 +66,7 @@ class MosaicLowRes extends PureComponent {
 
     return (
       <div id="MosaicLowResCont">
+        {dl_link}
         <div id="osdmoz" style={{width: this.props.width, height: this.props.width * this.ratio * .9}} ></div>
         
         {refreshButton}

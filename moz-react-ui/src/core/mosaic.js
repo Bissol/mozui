@@ -5,13 +5,13 @@ let SubSolverWorker = require("./workers/solveTilesSubset.w.js")
 
 class Mosaic {
   
-  constructor(collections, target, collection_cache, my_images) {
+  constructor(collections, target, collection_cache, my_images, mosaic_tile_size) {
     this.collections = collections
     this.myCollectionImages = my_images
     this.target = target
     this.workers = []
     this.nbSeeds = 8
-    this.mosaic_tile_size = 80
+    this.mosaic_tile_size = mosaic_tile_size
     this.globalParameters = undefined
     // this.allowTileFlip = false
     // this.distanceParam = 0

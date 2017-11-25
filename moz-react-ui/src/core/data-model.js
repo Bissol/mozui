@@ -247,7 +247,7 @@ class MosaicData {
     	let selectionOfCollections = this.getSelectedCollections()
 
     	if (selectionOfCollections && Object.keys(selectionOfCollections).length > 0 && this.target) {
-  	  	this.mosaic = new Mosaic(selectionOfCollections, this.target, this.collectionCache, this.myCollectionImages)
+  	  	this.mosaic = new Mosaic(selectionOfCollections, this.target, this.collectionCache, this.myCollectionImages, this.mosaic_tile_size)
         this.mosaic.globalParameters = this.parameters
         // this.mosaic.allowTileFlip = this.parameters.allowTileFlip
         // this.mosaic.distanceParam = this.parameters.distance
