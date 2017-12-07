@@ -188,9 +188,21 @@ class Mosaic {
         canvas.getContext('2d').globalCompositeOperation = this.globalParameters.edgesMergeMode
         canvas.getContext('2d').drawImage(this.target.edgeImage, 0, 0, mozaic_width, mozaic_height)
         canvas.getContext('2d').restore()
-        let data = canvas.toDataURL("image/jpeg", quality)
-        canvas = null
-        resolve(data)
+
+        let data = null
+        if (!HTMLCanvasElement.prototype.toBlob) {
+          data = canvas.toDataURL("image/jpeg", quality)
+          canvas = null
+          resolve(data)
+        }
+        else {
+          // Yeah, got support
+          console.log('Using blob')
+          canvas.toBlob(function(blob) {
+            canvas = null
+            resolve(blob)
+          }, 'image/jpeg', quality)
+        }
       }
       this.loadCollectionsToUse(collection_used_in_mosaic).then( () => {
         this.processTileJobListBlockMethod(tiles_to_process, this.myCollectionImages, canvas, done, progressCallback)

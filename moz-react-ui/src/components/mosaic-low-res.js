@@ -10,6 +10,8 @@ class MosaicLowRes extends PureComponent {
     this.state = {currentZoom : 5}
     this.ratio = this.props.height / this.props.width
     this.viewer = undefined
+    this.image = document.createElement('img')
+    this.dl_url = undefined
   }
 
   setScale(v) {
@@ -29,10 +31,26 @@ class MosaicLowRes extends PureComponent {
   }
 
   componentDidUpdate() {
-    this.viewer.open({
-      type: 'image',
-      url: this.props.imageSrc ? this.props.imageSrc : placeholderImg
-    })
+    if (this.props.imageSrc) {
+      this.image.onload = () => {
+          this.refs.lnk.href = this.image.src
+          this.viewer.open({
+          type: 'image',
+          url: this.props.imageSrc ? this.image.src : placeholderImg
+        })
+      }
+
+      if (!HTMLCanvasElement.prototype.toBlob) {
+        // prop is urldata
+        this.image.src = this.props.imageSrc
+        this.dl_url = this.props.imageSrc
+      }
+      else {
+        // prop is a blob
+        this.dl_url = URL.createObjectURL(this.props.imageSrc)
+        this.image.src = this.dl_url
+      }
+    }
   }
 
   componentDidMount() {
@@ -42,7 +60,7 @@ class MosaicLowRes extends PureComponent {
       showNavigator:  true,
       tileSources: {
         type: 'image',
-        url: this.props.imageSrc ? this.props.imageSrc : placeholderImg
+        url: placeholderImg
       },
       debugMode: false,
     })
@@ -51,14 +69,9 @@ class MosaicLowRes extends PureComponent {
 
   render() {
     // Download link
-    const dl_link = this.props.imageSrc ? <a href={this.props.imageSrc} download="mosaique.jpg">Télécharger</a> : ''
-    //console.log('Rendering mosaic (low resolution)')
-    //<RangeCtrl min={1} max={10} step={1} init={5} onNewValue={ (v) => this.setScale(v)} />
-    // <div id="panwrap">
-    //       <ElementPan height={this.props.width * this.ratio * .9} >
-    //         <img src={this.props.imageSrc ? this.props.imageSrc : placeholderImg} ref="hdmozimage" width={this.getWidth()} alt="Mosaique" className="mosaicImage"/>
-    //       </ElementPan>
-    //</div>
+    //const dl_link = this.props.imageSrc ? <a href={this.props.imageSrc} download="mosaique.jpg">Télécharger</a> : ''
+    const dl_link = this.props.imageSrc ? <a href={this.dl_url} download="mosaique.jpg" ref="lnk">Télécharger</a> : ''
+   
     let refreshButton = ''
     if (this.props.serverRenderNeeded) {
       refreshButton = <input className='centerButton' type='button' onClick={() => this.buttonPressed()} value={"Mettre à jour"} />
@@ -68,7 +81,6 @@ class MosaicLowRes extends PureComponent {
       <div id="MosaicLowResCont">
         {dl_link}
         <div id="osdmoz" style={{width: this.props.width, height: this.props.width * this.ratio * .9}} ></div>
-        
         {refreshButton}
         
         
